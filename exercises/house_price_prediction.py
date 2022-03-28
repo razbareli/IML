@@ -98,6 +98,7 @@ if __name__ == '__main__':
     fig = px.scatter(x=percent, y=loss, labels={"x": "percent", "y": "loss"},
                      title="loss as function of percent of samples ")
     fig.show()
+    print("hi")
 
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
     #   1) Sample p% of the overall training data
