@@ -1,6 +1,6 @@
 from challenge.agoda_cancellation_estimator import AgodaCancellationEstimator
 from IMLearn.utils import split_train_test
-
+from IMLearn.base import BaseEstimator
 import numpy as np
 import pandas as pd
 
