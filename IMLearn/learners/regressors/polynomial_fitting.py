@@ -19,7 +19,7 @@ class PolynomialFitting(BaseEstimator):
             Degree of polynomial to fit
         """
         super().__init__()
-        raise NotImplementedError()
+        self.deg = k
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
