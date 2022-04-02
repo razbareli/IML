@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import NoReturn
+from IMLearn.metrics.loss_functions import mean_square_error
 
 import pandas
 
@@ -35,6 +36,7 @@ class LinearRegression(BaseEstimator):
         """
         super().__init__()
         self.include_intercept_, self.coefs_ = include_intercept, None
+
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
@@ -96,8 +98,5 @@ class LinearRegression(BaseEstimator):
             Performance under MSE loss function
         """
         predicted = self._predict(X)
-        diff = y - predicted
-        squared = diff**2
-        summa = np.sum(squared)
-        return summa / diff.shape[0]
+        return mean_square_error(y, predicted)
 

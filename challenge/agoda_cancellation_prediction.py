@@ -1,3 +1,5 @@
+from sklearn.metrics import accuracy_score
+
 from challenge.agoda_cancellation_estimator import AgodaCancellationEstimator
 from IMLearn.utils import split_train_test
 from IMLearn.base import BaseEstimator
@@ -20,6 +22,7 @@ def load_data(filename: str):
     2) Tuple of pandas.DataFrame and Series
     3) Tuple of ndarray of shape (n_samples, n_features) and ndarray of shape (n_samples,)
     """
+    # print(filename)
     full_data = pd.read_csv(filename).fillna(
         False)
     # pre-processing
@@ -38,14 +41,25 @@ def load_data(filename: str):
     full_data['days_before_checkin'] = [i.days for i in (b2.to_numpy() - b1.to_numpy())]
     # choose what data we will train the model on
     feature_cols = ["hotel_id", "days_before_checkin",
-                     "accommadation_type_name_codes",
-                     "charge_option_codes",
-                     "customer_nationality_codes",
-                     "cancellation_policy_code_codes"]
-    full_data['label'] = full_data.cancellation_datetime.map(lambda x: bool(x) & True)
+                    "accommadation_type_name_codes",
+                    "charge_option_codes",
+                    "customer_nationality_codes",
+                    "cancellation_policy_code_codes"]
     features = full_data[feature_cols]
-    labels = full_data['label']
-    return features, labels
+
+    # full_data['label'] = full_data.cancellation_datetime.map(lambda x: bool(x) & True)
+    # labels = full_data['label']
+
+    # how many days after booking, the order was cancelled
+    if filename.endswith("train.csv"):
+        c1 = full_data['cancellation_datetime'].apply(lambda x: pd.Timestamp(x) if x is not False else x)
+        c2 = full_data['booking_datetime'].apply(lambda x: pd.Timestamp(x))
+        full_data['label2'] = [True if (c1[i] is not False and
+                           abs((c1[i] - c2[i]).days) <= 44) else False for i in range(len(c2))]
+        labels2 = full_data['label2']
+    else:
+        labels2 = None
+    return features, labels2
 
 
 def evaluate_and_export(estimator: BaseEstimator, X: np.ndarray, filename: str):
@@ -67,22 +81,37 @@ def evaluate_and_export(estimator: BaseEstimator, X: np.ndarray, filename: str):
         path to store file at
 
     """
-    # pd.DataFrame(estimator.predict(X), columns=["predicted_values"]).to_csv(filename, index=False)
-    prediction = estimator.predict(X)
-    return prediction
+    pd.DataFrame(estimator.predict(X), columns=["predicted_values"]).to_csv(filename, index=False)
+    estimate = estimator.predict(X)
+    return estimate
+
 
 if __name__ == '__main__':
     np.random.seed(0)
 
     # Load data
     df, cancellation_labels = load_data("../datasets/agoda_cancellation_train.csv")
-    train_X, train_y, test_X, test_y = split_train_test(df, cancellation_labels)
-
+    test_X, test_y, train_X, train_y,  = split_train_test(df, cancellation_labels)
+    (print(len(test_X), len(test_y), len(train_X), len(train_y), len(df)))
     # Fit model over data
     estimator = AgodaCancellationEstimator().fit(train_X, train_y)
+    # check accuracy for 2 classes model
+    prediction = evaluate_and_export(estimator, test_X, "id1_id2_id3.csv")
+    accuracy = accuracy_score(test_y, prediction)
+    true_positive = ((test_y == prediction) & (test_y)).sum() / len(test_y[test_y])
+    true_negative = ((test_y == prediction) & (~test_y)).sum() / len(test_y[~test_y])
+    print("accuracy = ", accuracy)
+    print("true positive = ", true_positive)
+    print("true negative = ", true_negative)
+    # load the real database
+    df, cancellation_labels = load_data("../datasets/test_set_week_1.csv")
 
     # Store model predictions over test set
-    prediction = evaluate_and_export(estimator, test_X, "id1_id2_id3.csv")
-    print("actual orders cancelled: ", np.bincount(test_y)[1])
-    print("predicted cancelled orders: ",np.bincount(prediction & test_y)[1])
-    print("correct guesses =  ", (np.bincount(prediction & test_y)[1]/np.bincount(test_y)[1])*100, "%")
+    prediction = evaluate_and_export(estimator, df, "id1_id2_id3.csv")
+    print(np.bincount(prediction))
+
+
+
+    # print("actual orders cancelled: ", np.bincount(test_y)[1])
+    # print("predicted cancelled orders: ",np.bincount(prediction & test_y)[1])
+    # print("correct guesses =  ", (np.bincount(prediction & test_y)[1]/np.bincount(test_y)[1])*100, "%")

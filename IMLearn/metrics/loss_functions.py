@@ -17,7 +17,7 @@ def mean_square_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     MSE of given predictions
     """
     diff = y_true - y_pred
-    squared = diff.square()
+    squared = diff**2
     summa = np.sum(squared)
     return summa / len(diff)
 

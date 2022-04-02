@@ -79,6 +79,7 @@ if __name__ == '__main__':
     # convert zipcode to dummy values since their value doesn't have logical order
     X = pd.get_dummies(X, columns=['zipcode'])
     X_train, y_train, X_test, y_test = split_train_test(X, y)
+    # print(len(X_train), len(X_test))
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     lin_reg = LinearRegression()
@@ -107,7 +108,7 @@ if __name__ == '__main__':
     confidence_minus = loss - std_loss
     print(confidence_minus.shape, confidence_plus.shape, loss.shape)
 
-    fig = px.scatter(x=percent*100, y=[loss, confidence_minus, confidence_plus], labels={"x": "% of training sample",
+    fig = px.scatter(x=percent, y=[loss, confidence_minus, confidence_plus], labels={"x": "% of training sample",
                                                                                          "y": "loss"},
                      title="loss as function of percent of samples ")
 
