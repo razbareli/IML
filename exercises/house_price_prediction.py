@@ -62,7 +62,7 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         p = (np.cov(feature, y) / (np.std(feature) * np.std(y)))[1][0]
         fig = px.scatter(x=feature, y=y, labels={"x": feature_name, "y": "Price"},
                          title="Price as a function of " + str(feature_name) +
-                               ". Pearson Corrolation = " + str(round(p, 2)))
+                               ". Pearson Corrolation = " + str(round(p, 3)))
         fig.write_image(output_path + str(feature_name) + ".png")
 
 
@@ -70,14 +70,18 @@ if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Loading and preprocessing of housing prices dataset
     X, y = load_data("C:\\Users\\97250\\PycharmProjects\\IML.HUJI\\datasets\\house_prices.csv")
-    # feature_evaluation(X, y, "C:\\Users\\97250\\PycharmProjects\\IML.HUJI\\exercises\\plots_house_prices\\")
 
     # Question 2 - Feature evaluation with respect to response
+    feature_evaluation(X, y, "C:\\Users\\97250\\PycharmProjects\\IML.HUJI\\exercises\\plots_house_prices\\")
 
     # Question 3 - Split samples into training and testing sets.
 
+    # continue pre-processing based on results of question 2:
     # convert zipcode to dummy values since their value doesn't have logical order
     X = pd.get_dummies(X, columns=['zipcode'])
+    # drop yr_built column since it is not beneficial to the model
+    X.drop(columns=['yr_built'], inplace=True)
+
     X_train, y_train, X_test, y_test = split_train_test(X, y)
     # print(len(X_train), len(X_test))
 
@@ -106,12 +110,20 @@ if __name__ == '__main__':
     loss = np.array(loss)
     confidence_plus = loss + std_loss
     confidence_minus = loss - std_loss
-    print(confidence_minus.shape, confidence_plus.shape, loss.shape)
+    # print(confidence_minus.shape, confidence_plus.shape, loss.shape)
 
-    fig = px.scatter(x=percent, y=[loss, confidence_minus, confidence_plus], labels={"x": "% of training sample",
-                                                                                         "y": "loss"},
-                     title="loss as function of percent of samples ")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=percent, y=loss, mode="markers+lines",
+                              marker=dict(color="blue"), showlegend=False))
+    fig.add_traces([
+        go.Scatter(x=percent, y=confidence_plus, fill="tonexty",
+                   line=dict(color="lightgrey"), showlegend=False),
+        go.Scatter(x=percent, y=confidence_minus, fill="tonexty",
+                   line=dict(color="lightgrey"),showlegend=False)
+    ])
 
+    fig.update_layout(title="Mean MSE Loss as Function of Percent of Samples",
+                      xaxis_title="% Of Training Sample", yaxis_title="MSE Loss")
     fig.show()
 
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:

@@ -37,23 +37,21 @@ if __name__ == '__main__':
     all_data = load_data('C:\\Users\\97250\\PycharmProjects\\IML.HUJI\\datasets\\City_Temperature.csv')
     # Question 2 - Exploring data for specific country
     israel_data = all_data.loc[all_data.Country == 'Israel']
-    # print(israel_data)
     # 2.a
-    # fig = px.scatter(x=israel_data['DayOfYear'], y=israel_data['Temp'],
-    #                  labels={"x": "Day Of Year", "y": "Temperature in Celsius"},
-    #                  color=israel_data['Year'].apply(lambda x: str(x)),
-    #                  title="Temperatures as function of Day of Year in Tel Aviv, Israel ")
-    #
-    # fig.show()
+    fig = px.scatter(x=israel_data['DayOfYear'], y=israel_data['Temp'],
+                     labels={"x": "Day Of Year", "y": "Temperature in Celsius"},
+                     color=israel_data['Year'].apply(lambda x: str(x)),
+                     title="Temperatures as function of Day of Year in Tel Aviv, Israel ")
+
+    fig.show()
 
     # 2.b
     group_by_month = israel_data.groupby('Month').std()
-    # print(group_by_month)
-    # fig = px.bar(x=[i for i in range(1,13)], y=group_by_month['Temp'],
-    #                  labels={"x": "Month", "y": "Standard Deviation of Daily Temperatures"},
-    #                  title="Standard Deviation of Daily Temperatures Each Month ")
-    #
-    # fig.show()
+    fig = px.bar(x=[i for i in range(1,13)], y=group_by_month['Temp'],
+                     labels={"x": "Month", "y": "Standard Deviation of Daily Temperatures"},
+                     title="Standard Deviation of Daily Temperatures Each Month ")
+
+    fig.show()
 
     # Question 3 - Exploring differences between countries
 
@@ -61,8 +59,9 @@ if __name__ == '__main__':
     group_by_month_country.columns = ['Mean Temp', 'STD']
     group_by_month_country = group_by_month_country.reset_index()
 
-    fig = px.line(group_by_month_country, x='Month', y='Mean Temp', error_y='STD', color='Country')
-    # fig.show()
+    fig = px.line(group_by_month_country, x='Month', y='Mean Temp', error_y='STD', color='Country',
+                  title="Mean Temperatures of Countries by Month")
+    fig.show()
 
     # Question 4 - Fitting model for different values of `k`
     y = israel_data.pop('Temp')

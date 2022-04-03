@@ -39,12 +39,23 @@ def load_data(filename: str):
     b2 = pd.to_datetime(full_data['checkin_date']).apply(lambda x: x.date())
     b1 = pd.to_datetime(full_data['booking_datetime']).apply(lambda x: x.date())
     full_data['days_before_checkin'] = [i.days for i in (b2.to_numpy() - b1.to_numpy())]
+
+    full_data['days_before_checkin_pol'] = full_data["cancellation_policy_code"].str.extract(pat='^([0-9]*D)')
+    full_data['days_before_checkin_pol'] = full_data['days_before_checkin_pol'].str[:-1]
+    full_data['days_before_checkin_pol'] = full_data['days_before_checkin_pol'].fillna(0)
+    pd.to_numeric(full_data['days_before_checkin'], errors='coerce')
+    pd.to_numeric(full_data['days_before_checkin_pol'], errors='coerce')
+    full_data['will_pay_for_cancellation'] = pd.to_numeric(full_data['days_before_checkin'], errors='coerce').subtract(
+        pd.to_numeric(full_data['days_before_checkin_pol'], errors='coerce'), fill_value=0)
+    full_data['will_pay_for_cancellation'] = full_data.will_pay_for_cancellation.map(lambda x: x > 0)
     # choose what data we will train the model on
     feature_cols = ["hotel_id", "days_before_checkin",
                     "accommadation_type_name_codes",
                     "charge_option_codes",
                     "customer_nationality_codes",
-                    "cancellation_policy_code_codes"]
+                    "cancellation_policy_code_codes",
+                    "will_pay_for_cancellation"
+                    ]
     features = full_data[feature_cols]
 
     # full_data['label'] = full_data.cancellation_datetime.map(lambda x: bool(x) & True)
