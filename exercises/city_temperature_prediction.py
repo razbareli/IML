@@ -4,7 +4,6 @@ from IMLearn.utils import split_train_test
 
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
 
@@ -74,8 +73,8 @@ if __name__ == '__main__':
         pol_regg.fit(X_train, y_train)
         pol_deg.append(k)
         loss.append(round(pol_regg.loss(X_test.to_numpy(), y_test.to_numpy()), 2))
-    print(pol_deg)
-    print(loss)
+    print("degree:" ,pol_deg)
+    print("loss: ", loss)
     fig = px.bar(x=pol_deg, y=loss, labels={"x": "Polynom Degree", "y": "MSE Loss"},
                      title="MSE Loss as function of Polynom Degree")
 
@@ -85,7 +84,7 @@ if __name__ == '__main__':
     country = []
     loss_country = []
 
-    israel_fit = PolynomialFitting(6)
+    israel_fit = PolynomialFitting(5)
     israel_fit.fit(X, y)
 
     jordan_data = all_data.loc[all_data.Country == 'Jordan']
@@ -107,7 +106,7 @@ if __name__ == '__main__':
     loss_country.append(israel_fit.loss(X, y))
 
     fig = px.bar(x=country, y=loss_country, labels={"x": "Country", "y": "MSE Loss"},
-                     title="MSE Loss for each country, by Polyfit of Deg 6 on Israel Data")
+                     title="MSE Loss for each country, by Polyfit of Deg 5 on Israel Data")
 
     fig.show()
 

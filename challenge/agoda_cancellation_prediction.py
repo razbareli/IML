@@ -103,22 +103,23 @@ if __name__ == '__main__':
     # Load data
     df, cancellation_labels = load_data("../datasets/agoda_cancellation_train.csv")
     test_X, test_y, train_X, train_y,  = split_train_test(df, cancellation_labels)
-    (print(len(test_X), len(test_y), len(train_X), len(train_y), len(df)))
+    # (print(len(test_X), len(test_y), len(train_X), len(train_y), len(df)))
     # Fit model over data
     estimator = AgodaCancellationEstimator().fit(train_X, train_y)
     # check accuracy for 2 classes model
-    prediction = evaluate_and_export(estimator, test_X, "id1_id2_id3.csv")
-    accuracy = accuracy_score(test_y, prediction)
-    true_positive = ((test_y == prediction) & (test_y)).sum() / len(test_y[test_y])
-    true_negative = ((test_y == prediction) & (~test_y)).sum() / len(test_y[~test_y])
-    print("accuracy = ", accuracy)
-    print("true positive = ", true_positive)
-    print("true negative = ", true_negative)
+    # prediction = evaluate_and_export(estimator, test_X, "id1_id2_id3.csv")
+    # accuracy = accuracy_score(test_y, prediction)
+    # true_positive = ((test_y == prediction) & (test_y)).sum() / len(test_y[test_y])
+    # true_negative = ((test_y == prediction) & (~test_y)).sum() / len(test_y[~test_y])
+    # print("accuracy = ", accuracy)
+    # print("true positive = ", true_positive)
+    # print("true negative = ", true_negative)
     # load the real database
-    df, cancellation_labels = load_data("../datasets/test_set_week_1.csv")
+    df, cancellation_labels = load_data("../datasets/test_set_week_2.csv")
 
     # Store model predictions over test set
-    prediction = evaluate_and_export(estimator, df, "id1_id2_id3.csv")
+    prediction = evaluate_and_export(estimator, df, "209019256_203488747_204859326.csv")
+    print(["False", "True"])
     print(np.bincount(prediction))
 
 
