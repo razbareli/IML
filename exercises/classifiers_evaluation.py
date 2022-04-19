@@ -4,6 +4,7 @@ from typing import Tuple
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
+
 pio.templates.default = "simple_white"
 
 
@@ -26,7 +27,10 @@ def load_dataset(filename: str) -> Tuple[np.ndarray, np.ndarray]:
         Class vector specifying for each sample its class
 
     """
-    raise NotImplementedError()
+    data = np.load(filename)
+    X = data[:, 0:2]
+    y = data[:, 2]
+    return X, y
 
 
 def run_perceptron():
@@ -36,17 +40,24 @@ def run_perceptron():
     Create a line plot that shows the perceptron algorithm's training loss values (y-axis)
     as a function of the training iterations (x-axis).
     """
-    for n, f in [("Linearly Separable", "linearly_separable.npy"), ("Linearly Inseparable", "linearly_inseparable.npy")]:
+    for n, f in [("Linearly Separable", "linearly_separable.npy"),
+                 ("Linearly Inseparable", "linearly_inseparable.npy")]:
         # Load dataset
-        raise NotImplementedError()
+        X, y = load_dataset(f"../datasets/{f}")
 
         # Fit Perceptron and record loss in each fit iteration
         losses = []
-        raise NotImplementedError()
+
+        callback_func = lambda fit, X_dummy, y_dummy: losses.append(fit.loss(X, y))
+        perc = Perceptron(callback=callback_func)
+        perc.fit(X, y)
+        print(losses)
 
         # Plot figure
-        raise NotImplementedError()
-
+        fig = go.Figure([go.Scatter(y=losses, mode='lines')],
+                  layout=go.Layout(title=f"Loss as function of iteration, for {n} data",
+                                   xaxis=dict(title="number of iterations"), yaxis=dict(title="losses")))
+        fig.show()
 
 def compare_gaussian_classifiers():
     """
@@ -68,4 +79,4 @@ def compare_gaussian_classifiers():
 if __name__ == '__main__':
     np.random.seed(0)
     run_perceptron()
-    compare_gaussian_classifiers()
+    # compare_gaussian_classifiers()

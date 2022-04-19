@@ -24,7 +24,7 @@ def test_univariate_gaussian():
     fig.show()
 
     # Question 3 - Plotting Empirical PDF of fitted model
-    fig = px.scatter(x=samples, y=uni.pdf(samples), labels={"x": "Sample Value", "y": "Probabilyty"})
+    fig = px.scatter(x=samples, y=uni.pdf(samples), labels={"x": "Sample Value", "y": "Probability"})
     fig.show()
 
 
