@@ -51,7 +51,7 @@ def run_perceptron():
         callback_func = lambda fit, X_dummy, y_dummy: losses.append(fit.loss(X, y))
         perc = Perceptron(callback=callback_func)
         perc.fit(X, y)
-        print(losses)
+        # print(losses)
 
         # Plot figure
         fig = go.Figure([go.Scatter(y=losses, mode='lines')],
@@ -65,18 +65,36 @@ def compare_gaussian_classifiers():
     """
     for f in ["gaussian1.npy", "gaussian2.npy"]:
         # Load dataset
-        raise NotImplementedError()
+        X, y = load_dataset(f"../datasets/{f}")
+
 
         # Fit models and predict over training set
-        raise NotImplementedError()
+        lda = LDA()
+        lda.fit(X, y)
+        print(lda.likelihood(X))
+        print(lda.predict(X))
+        print(sum(lda.predict(X) == y))
+
+
+
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         from IMLearn.metrics import accuracy
-        raise NotImplementedError()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
-    run_perceptron()
-    # compare_gaussian_classifiers()
+    # run_perceptron()
+    compare_gaussian_classifiers()
+    # arr = np.array([1,0,0,1,2,2,2,2,2,1,1,30,1,2,1,1])
+    # print(np.where(np.amax(arr)))
+    # print(arr == 0)
+    # unique, counts = np.unique(arr, return_counts=True)
+    # print(unique, counts)
+    # pi = np.array([i/len(arr) for i in counts])
+    # mat = np.array([[1,2,3],[2,3,3]])
+    # print(mat[0])
+    # vec = np.array([1,0])
+    # print(mat[vec==1].mean(axis=0))
+
