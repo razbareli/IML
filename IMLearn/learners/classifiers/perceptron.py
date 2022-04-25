@@ -79,6 +79,7 @@ class Perceptron(BaseEstimator):
                     updated_w = True
                     break
             if not updated_w:
+                # print(counter)
                 break
             counter += 1
         return
@@ -97,7 +98,7 @@ class Perceptron(BaseEstimator):
         """
         # in case we need to include intercept, insert a column of 1's
         if self.include_intercept_:
-            X = np.insert(X, 0, np.ones(X.shape[0]), axis=1)
+            X = np.insert(X, 0, np.ones(X.shape[0]), axis=1)  # todo check if need to map zero to 1
         return np.sign(np.matmul(X, self.coefs_))
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:

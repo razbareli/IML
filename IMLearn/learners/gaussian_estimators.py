@@ -209,7 +209,7 @@ class MultivariateGaussian:
             log-likelihood calculated over all input data and under given parameters of Gaussian
         """
         M = X.shape[0]  # number of samples
-        D = X.shape[1]  # the dimension of the vector of each sample
+        D = X.shape[1]  # the dimension of the vector of each sample (num of features)
         diff = X - mu  # all samples - the mean
         log_det_cov = slogdet(cov)[0] * slogdet(cov)[1]
         sum_part_func = lambda i: np.transpose(i).dot(inv(cov)).dot(i)

@@ -64,7 +64,14 @@ class LDA(BaseEstimator):
         # inv
         self._cov_inv = np.linalg.inv(self.cov_)
         self.fitted_ = True
+        print("classes:")
+        print(self.classes_)
+        print("mu:")
+        print(self.mu_)
+        print("cov:")
         print(self.cov_)
+        print("pi:")
+        print(self.pi_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """

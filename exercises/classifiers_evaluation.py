@@ -51,7 +51,6 @@ def run_perceptron():
         callback_func = lambda fit, X_dummy, y_dummy: losses.append(fit.loss(X, y))
         perc = Perceptron(callback=callback_func)
         perc.fit(X, y)
-        # print(losses)
 
         # Plot figure
         fig = go.Figure([go.Scatter(y=losses, mode='lines')],
@@ -69,12 +68,32 @@ def compare_gaussian_classifiers():
 
 
         # Fit models and predict over training set
-        lda = LDA()
-        lda.fit(X, y)
-        print(lda.likelihood(X))
-        print(lda.predict(X))
-        print(sum(lda.predict(X) == y))
+        # lda = LDA()
+        # lda.fit(X, y)
+        # print(lda.likelihood(X))
+        # print(lda.predict(X))
+        # print(sum(lda.predict(X) == y))
 
+        # test lda
+        # from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+        # test_lda = LinearDiscriminantAnalysis(store_covariance=True)
+        # test_lda.fit(X, y)
+        # print(test_lda.covariance_)
+        # print(sum(test_lda.predict(X) == y))
+
+        naive = GaussianNaiveBayes()
+        X = np.array([[1,1],[1,2], [2,3], [2,4], [3,3], [3,4]])
+        y = np.array([0,0,1,1,1,1])
+        naive.fit(X, y)
+        # print(naive.likelihood(X))
+        # print(naive.predict(X))
+        # print(sum(naive.predict(X) == y))
+
+        # test naive
+        # from sklearn.naive_bayes import GaussianNB
+        # test_naive = GaussianNB()
+        # test_naive.fit(X, y)
+        # print(sum(test_naive.predict(X) == y))
 
 
 
@@ -85,8 +104,8 @@ def compare_gaussian_classifiers():
 
 if __name__ == '__main__':
     np.random.seed(0)
-    # run_perceptron()
-    compare_gaussian_classifiers()
+    run_perceptron()
+    # compare_gaussian_classifiers()
     # arr = np.array([1,0,0,1,2,2,2,2,2,1,1,30,1,2,1,1])
     # print(np.where(np.amax(arr)))
     # print(arr == 0)
