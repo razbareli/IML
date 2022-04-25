@@ -66,54 +66,52 @@ def compare_gaussian_classifiers():
         # Load dataset
         X, y = load_dataset(f"../datasets/{f}")
 
-
         # Fit models and predict over training set
-        # lda = LDA()
-        # lda.fit(X, y)
-        # print(lda.likelihood(X))
-        # print(lda.predict(X))
-        # print(sum(lda.predict(X) == y))
-
-        # test lda
-        # from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-        # test_lda = LinearDiscriminantAnalysis(store_covariance=True)
-        # test_lda.fit(X, y)
-        # print(test_lda.covariance_)
-        # print(sum(test_lda.predict(X) == y))
+        lda = LDA()
+        lda.fit(X, y)
+        lda_pred = lda.predict(X)
 
         naive = GaussianNaiveBayes()
-        X = np.array([[1,1],[1,2], [2,3], [2,4], [3,3], [3,4]])
-        y = np.array([0,0,1,1,1,1])
         naive.fit(X, y)
-        # print(naive.likelihood(X))
-        # print(naive.predict(X))
-        # print(sum(naive.predict(X) == y))
-
-        # test naive
-        # from sklearn.naive_bayes import GaussianNB
-        # test_naive = GaussianNB()
-        # test_naive.fit(X, y)
-        # print(sum(test_naive.predict(X) == y))
+        naive_pred = naive.predict(X)
 
 
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         from IMLearn.metrics import accuracy
+        lda_accuracy = accuracy(y, lda_pred)
+        naive_accuracy = accuracy(y, naive_pred)
+
+        # list just for iterating while plotting
+        predictions = [None, lda_pred, naive_pred]
+
+        from IMLearn.metrics import accuracy
+        lda_accuracy = round(accuracy(y, lda_pred), 3)
+        naive_accuracy = round(accuracy(y, naive_pred), 3)
+
+        fig = make_subplots(rows=1, cols=2, subplot_titles=[
+            "LDA Classifier <br> Accuracy = " + str(lda_accuracy),
+            "Naive Base Gaussian Classifier <br> Accuracy = " + str(naive_accuracy)],
+                            horizontal_spacing=0.01, vertical_spacing=.03)
+        for index, estimator in enumerate([naive, lda], start=1):
+            # Add the data
+            fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
+                                     marker=dict(color=predictions[index], symbol=y,
+                                                 line=dict(color="black", width=1))), row=1, col=index)
+
+            # Add `X` for mean of distribution
+            fig.add_trace(go.Scatter(x=estimator.mu_[:, 0], y=estimator.mu_[:, 1], mode="markers", showlegend=False,
+                                     marker=dict(color='black', symbol='x', size=12,
+                                                 line=dict(color="black", width=1))), row=1, col=index)
+
+        fig.update_layout(title_text=f"Classifier Comparison Dataset: {f}", title_x=0.5)
+        fig.show()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
-    run_perceptron()
-    # compare_gaussian_classifiers()
-    # arr = np.array([1,0,0,1,2,2,2,2,2,1,1,30,1,2,1,1])
-    # print(np.where(np.amax(arr)))
-    # print(arr == 0)
-    # unique, counts = np.unique(arr, return_counts=True)
-    # print(unique, counts)
-    # pi = np.array([i/len(arr) for i in counts])
-    # mat = np.array([[1,2,3],[2,3,3]])
-    # print(mat[0])
-    # vec = np.array([1,0])
-    # print(mat[vec==1].mean(axis=0))
+    # run_perceptron()
+    compare_gaussian_classifiers()
+
 
