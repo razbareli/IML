@@ -1,9 +1,9 @@
 from IMLearn.learners.classifiers import Perceptron, LDA, GaussianNaiveBayes
-import numpy as np
 from typing import Tuple
+from utils import *
 import plotly.graph_objects as go
-import plotly.io as pio
 from plotly.subplots import make_subplots
+from math import atan2, pi
 
 pio.templates.default = "simple_white"
 
@@ -57,6 +57,26 @@ def run_perceptron():
                   layout=go.Layout(title=f"Loss as function of iteration, for {n} data",
                                    xaxis=dict(title="number of iterations"), yaxis=dict(title="losses")))
         fig.show()
+def get_ellipse(mu: np.ndarray, cov: np.ndarray):
+    """
+    Draw an ellipse centered at given location and according to specified covariance matrix
+    Parameters
+    ----------
+    mu : ndarray of shape (2,)
+        Center of ellipse
+    cov: ndarray of shape (2,2)
+        Covariance of Gaussian
+    Returns
+    -------
+        scatter: A plotly trace object of the ellipse
+    """
+    l1, l2 = tuple(np.linalg.eigvalsh(cov)[::-1])
+    theta = atan2(l1 - cov[0, 0], cov[0, 1]) if cov[0, 1] != 0 else (np.pi / 2 if cov[0, 0] < cov[1, 1] else 0)
+    t = np.linspace(0, 2 * pi, 100)
+    xs = (l1 * np.cos(theta) * np.cos(t)) - (l2 * np.sin(theta) * np.sin(t))
+    ys = (l1 * np.sin(theta) * np.cos(t)) + (l2 * np.cos(theta) * np.sin(t))
+
+    return go.Scatter(x=mu[0] + xs, y=mu[1] + ys, mode="lines", marker_color="black", showlegend=False)
 
 def compare_gaussian_classifiers():
     """
@@ -70,43 +90,47 @@ def compare_gaussian_classifiers():
         lda = LDA()
         lda.fit(X, y)
         lda_pred = lda.predict(X)
-
+        X = np.array([[1,1],[1,2],[2,3],[2,4],[3,3],[3,4]])
+        y = np.array([0,0,1,1,1,1])
         naive = GaussianNaiveBayes()
         naive.fit(X, y)
         naive_pred = naive.predict(X)
 
-
-
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
-        from IMLearn.metrics import accuracy
-        lda_accuracy = accuracy(y, lda_pred)
-        naive_accuracy = accuracy(y, naive_pred)
-
-        # list just for iterating while plotting
-        predictions = [None, lda_pred, naive_pred]
-
-        from IMLearn.metrics import accuracy
-        lda_accuracy = round(accuracy(y, lda_pred), 3)
-        naive_accuracy = round(accuracy(y, naive_pred), 3)
-
-        fig = make_subplots(rows=1, cols=2, subplot_titles=[
-            "LDA Classifier <br> Accuracy = " + str(lda_accuracy),
-            "Naive Base Gaussian Classifier <br> Accuracy = " + str(naive_accuracy)],
-                            horizontal_spacing=0.01, vertical_spacing=.03)
-        for index, estimator in enumerate([naive, lda], start=1):
-            # Add the data
-            fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
-                                     marker=dict(color=predictions[index], symbol=y,
-                                                 line=dict(color="black", width=1))), row=1, col=index)
-
-            # Add `X` for mean of distribution
-            fig.add_trace(go.Scatter(x=estimator.mu_[:, 0], y=estimator.mu_[:, 1], mode="markers", showlegend=False,
-                                     marker=dict(color='black', symbol='x', size=12,
-                                                 line=dict(color="black", width=1))), row=1, col=index)
-
-        fig.update_layout(title_text=f"Classifier Comparison Dataset: {f}", title_x=0.5)
-        fig.show()
+        # from IMLearn.metrics import accuracy
+        # lda_accuracy = accuracy(y, lda_pred)
+        # naive_accuracy = accuracy(y, naive_pred)
+        #
+        # from IMLearn.metrics import accuracy
+        # lda_accuracy = round(accuracy(y, lda_pred), 3)
+        # naive_accuracy = round(accuracy(y, naive_pred), 3)
+        #
+        # fig = make_subplots(rows=1, cols=2, subplot_titles=[
+        #     "Naive Base Gaussian Classifier <br> Accuracy = " + str(naive_accuracy),
+        #     "LDA Classifier <br> Accuracy = " + str(lda_accuracy)],
+        #                     horizontal_spacing=0.01, vertical_spacing=.03)
+        # for index, model in enumerate([naive, lda], start=1):
+        #     # add the data
+        #     fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
+        #                              marker=dict(color=model.predict(X), symbol=y,
+        #                              line=dict(color="black", width=1))), row=1, col=index)
+        #
+        #     # add X symbol for mean of distribution
+        #     fig.add_trace(go.Scatter(x=model.mu_[:, 0], y=model.mu_[:, 1], mode="markers", showlegend=False,
+        #                              marker=dict(color='black', symbol='x', size=12,
+        #                              line=dict(color="black", width=1))), row=1, col=index)
+        #
+        #     # Add ellipses of covariances of fitted gaussians
+        #     for k in range(len(model.classes_)):
+        #         if model is lda:
+        #             cov = model.cov_
+        #         else:
+        #             cov = np.diag(model.vars_[k])
+        #         fig.add_trace(get_ellipse(model.mu_[k], cov), row=1, col=index)
+        #
+        # fig.update_layout(title_text=f"Classifier Comparison of {f}", title_x=0.5)
+        # fig.show()
 
 
 if __name__ == '__main__':

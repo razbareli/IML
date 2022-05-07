@@ -54,7 +54,7 @@ class LDA(BaseEstimator):
         d = dict()  # maps class name to index
         for index, value in enumerate(self.classes_):
             d[value] = index
-        print(d)
+
 
         self.cov_ = np.zeros((X.shape[1], X.shape[1]))
         for i in range(X.shape[0]):
@@ -64,14 +64,14 @@ class LDA(BaseEstimator):
         # inv
         self._cov_inv = np.linalg.inv(self.cov_)
         self.fitted_ = True
-        print("classes:")
-        print(self.classes_)
-        print("mu:")
-        print(self.mu_)
-        print("cov:")
-        print(self.cov_)
-        print("pi:")
-        print(self.pi_)
+        # print("classes:")
+        # print(self.classes_)
+        # print("mu:")
+        # print(self.mu_)
+        # print("cov:")
+        # print(self.cov_)
+        # print("pi:")
+        # print(self.pi_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """

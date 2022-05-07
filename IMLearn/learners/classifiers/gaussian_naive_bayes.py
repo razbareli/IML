@@ -45,14 +45,14 @@ class GaussianNaiveBayes(BaseEstimator):
             var.append(X[y == i].var(axis=0, ddof=1))
         self.mu_ = np.array(mu)
         self.vars_ = np.array(var)
-        print("classes:")
-        print(self.classes_)
+        # print("classes:")
+        # print(self.classes_)
         print("mu:")
         print(self.mu_)
         print("vars:")
         print(self.vars_)
-        print("pi:")
-        print(self.pi_)
+        # print("pi:")
+        # print(self.pi_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
