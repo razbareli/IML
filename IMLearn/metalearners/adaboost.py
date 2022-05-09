@@ -48,7 +48,24 @@ class AdaBoost(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        self.models_ = [None] * self.iterations_
+        self.weights_ = [0] * self.iterations_
+
+        m = X.shape[0]  # number of samples
+        self.D_ = np.ones(m) / m  # set initial distribution to uniform
+        for it in range(self.iterations_):
+            self.models_[it] = self.wl_().fit(X, y * self.D_)
+            y_pred = self.models_[it].predict(X)
+            # calculate epsilon
+            error = y_pred - y
+            error[error != 0] = 1
+            error = np.sum(self.D_ * error)
+            # set weights
+            w = 0.5 * np.log((1 / error) - 1)
+            self.weights_[it] = w
+            # update weights
+            self.D_ = self.D_ * np.exp((-y * w * y_pred))
+            self.D_ = self.D_ / np.sum(self.D_)
 
     def _predict(self, X):
         """
@@ -64,7 +81,10 @@ class AdaBoost(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        prediction = np.zeros(X.shape[0])
+        for it in range(self.iterations_):
+            prediction += self.weights_[it] * self.models_[it].predict(X)
+        return np.sign(prediction)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -83,7 +103,8 @@ class AdaBoost(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        raise NotImplementedError()
+        from ..metrics import misclassification_error
+        return misclassification_error(y, self.predict(X))
 
     def partial_predict(self, X: np.ndarray, T: int) -> np.ndarray:
         """
@@ -102,7 +123,8 @@ class AdaBoost(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        self.iterations_ = T
+        return self.predict(X)
 
     def partial_loss(self, X: np.ndarray, y: np.ndarray, T: int) -> float:
         """
@@ -124,4 +146,5 @@ class AdaBoost(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        raise NotImplementedError()
+        from ..metrics import misclassification_error
+        return misclassification_error(y, self.partial_predict(X, T))

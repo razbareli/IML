@@ -20,6 +20,7 @@ class DecisionStump(BaseEstimator):
     self.sign_: int
         The label to predict for samples where the value of the j'th feature is about the threshold
     """
+
     def __init__(self) -> DecisionStump:
         """
         Instantiate a Decision stump classifier
@@ -42,10 +43,11 @@ class DecisionStump(BaseEstimator):
         min_loss = None
         for sign, feature in product([-1, 1], range(X.shape[1])):
             loss, val = self._find_threshold(X[:, feature], y, sign)
+            # print(sign, feature)
+
             if min_loss is None or loss < min_loss:
                 min_loss = loss
                 self.threshold_, self.j_, self.sign_ = val, feature, sign
-
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -70,7 +72,6 @@ class DecisionStump(BaseEstimator):
         to or above the threshold are predicted as `sign`
         """
         return ((X[:, self.j_] >= self.threshold_) * 2 - 1) * self.sign_
-
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
@@ -102,18 +103,32 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
+
+        # s = np.argsort(values)
+        # X, y = values[s], labels[s]
+        # X = np.concatenate([X, X])
+        # loss = np.sum([y == sign])
+        # losses = np.append(loss, loss - np.cumsum((y * sign)))
+        # min_loss_index = np.argmin(losses)
+        # return losses[min_loss_index], X[min_loss_index]
+
         # just for convenience we'll work with sorted values
         s = np.argsort(values)
         X, y = values[s], labels[s]
+        D = abs(y)
         min_loss = None
         best_val = None
         for i, val in enumerate(X):
-            y_test = y
+            y_test = np.zeros(y.shape[0])
             y_test[:i] = -sign
             y_test[i:] = sign
-            loss = np.sum(y == y_test) / y.shape[0]
+            match = (np.sign(y) == y_test) * D
+            # print(match)
+            loss = np.sum(match) / y.shape[0]
+            # print(loss)
             if (min_loss is None and best_val is None) or loss < min_loss:
                 min_loss, best_val = loss, val
+        # print(min_loss, best_val)
         return min_loss, best_val
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:

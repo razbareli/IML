@@ -96,8 +96,8 @@ def compare_gaussian_classifiers():
         naive.fit(X, y)
         naive_pred = naive.predict(X)
 
-        # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
-        # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
+        # # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
+        # # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # from IMLearn.metrics import accuracy
         # lda_accuracy = accuracy(y, lda_pred)
         # naive_accuracy = accuracy(y, naive_pred)
