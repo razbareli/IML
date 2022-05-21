@@ -96,41 +96,41 @@ def compare_gaussian_classifiers():
         naive.fit(X, y)
         naive_pred = naive.predict(X)
 
-        # # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
-        # # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
-        # from IMLearn.metrics import accuracy
-        # lda_accuracy = accuracy(y, lda_pred)
-        # naive_accuracy = accuracy(y, naive_pred)
-        #
-        # from IMLearn.metrics import accuracy
-        # lda_accuracy = round(accuracy(y, lda_pred), 3)
-        # naive_accuracy = round(accuracy(y, naive_pred), 3)
-        #
-        # fig = make_subplots(rows=1, cols=2, subplot_titles=[
-        #     "Naive Base Gaussian Classifier <br> Accuracy = " + str(naive_accuracy),
-        #     "LDA Classifier <br> Accuracy = " + str(lda_accuracy)],
-        #                     horizontal_spacing=0.01, vertical_spacing=.03)
-        # for index, model in enumerate([naive, lda], start=1):
-        #     # add the data
-        #     fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
-        #                              marker=dict(color=model.predict(X), symbol=y,
-        #                              line=dict(color="black", width=1))), row=1, col=index)
-        #
-        #     # add X symbol for mean of distribution
-        #     fig.add_trace(go.Scatter(x=model.mu_[:, 0], y=model.mu_[:, 1], mode="markers", showlegend=False,
-        #                              marker=dict(color='black', symbol='x', size=12,
-        #                              line=dict(color="black", width=1))), row=1, col=index)
-        #
-        #     # Add ellipses of covariances of fitted gaussians
-        #     for k in range(len(model.classes_)):
-        #         if model is lda:
-        #             cov = model.cov_
-        #         else:
-        #             cov = np.diag(model.vars_[k])
-        #         fig.add_trace(get_ellipse(model.mu_[k], cov), row=1, col=index)
-        #
-        # fig.update_layout(title_text=f"Classifier Comparison of {f}", title_x=0.5)
-        # fig.show()
+        # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
+        # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
+        from IMLearn.metrics import accuracy
+        lda_accuracy = accuracy(y, lda_pred)
+        naive_accuracy = accuracy(y, naive_pred)
+
+        from IMLearn.metrics import accuracy
+        lda_accuracy = round(accuracy(y, lda_pred), 3)
+        naive_accuracy = round(accuracy(y, naive_pred), 3)
+
+        fig = make_subplots(rows=1, cols=2, subplot_titles=[
+            "Naive Base Gaussian Classifier <br> Accuracy = " + str(naive_accuracy),
+            "LDA Classifier <br> Accuracy = " + str(lda_accuracy)],
+                            horizontal_spacing=0.01, vertical_spacing=.03)
+        for index, model in enumerate([naive, lda], start=1):
+            # add the data
+            fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
+                                     marker=dict(color=model.predict(X), symbol=y,
+                                     line=dict(color="black", width=1))), row=1, col=index)
+
+            # add X symbol for mean of distribution
+            fig.add_trace(go.Scatter(x=model.mu_[:, 0], y=model.mu_[:, 1], mode="markers", showlegend=False,
+                                     marker=dict(color='black', symbol='x', size=12,
+                                     line=dict(color="black", width=1))), row=1, col=index)
+
+            # Add ellipses of covariances of fitted gaussians
+            for k in range(len(model.classes_)):
+                if model is lda:
+                    cov = model.cov_
+                else:
+                    cov = np.diag(model.vars_[k])
+                fig.add_trace(get_ellipse(model.mu_[k], cov), row=1, col=index)
+
+        fig.update_layout(title_text=f"Classifier Comparison of {f}", title_x=0.5)
+        fig.show()
 
 
 if __name__ == '__main__':

@@ -63,9 +63,10 @@ class AdaBoost(BaseEstimator):
             # set weights
             w = 0.5 * np.log((1 / error) - 1)
             self.weights_[it] = w
-            # update weights
+            # update D
             self.D_ = self.D_ * np.exp((-y * w * y_pred))
             self.D_ = self.D_ / np.sum(self.D_)
+        self.fitted_ = True
 
     def _predict(self, X):
         """

@@ -115,7 +115,7 @@ if __name__ == '__main__':
     # print("true positive = ", true_positive)
     # print("true negative = ", true_negative)
     # load the real database
-    df, cancellation_labels = load_data("../datasets/test_set_week_5.csv")
+    df, cancellation_labels = load_data("../datasets/week_6_test_data.csv")
 
     # Store model predictions over test set
     prediction = evaluate_and_export(estimator, df, "209019256_203488747_204859326.csv")

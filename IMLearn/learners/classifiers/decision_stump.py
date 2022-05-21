@@ -104,14 +104,6 @@ class DecisionStump(BaseEstimator):
         which equal to or above the threshold are predicted as `sign`
         """
 
-        # s = np.argsort(values)
-        # X, y = values[s], labels[s]
-        # X = np.concatenate([X, X])
-        # loss = np.sum([y == sign])
-        # losses = np.append(loss, loss - np.cumsum((y * sign)))
-        # min_loss_index = np.argmin(losses)
-        # return losses[min_loss_index], X[min_loss_index]
-
         # just for convenience we'll work with sorted values
         s = np.argsort(values)
         X, y = values[s], labels[s]
