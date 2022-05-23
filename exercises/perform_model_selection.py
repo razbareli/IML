@@ -32,25 +32,25 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     mu = 0
     f = lambda x: (x + 3) * (x + 2) * (x + 1) * (x - 1) * (x - 2)
     epsilon = np.random.normal(mu, noise, n_samples)
-    samples = np.random.uniform(-1.2, 2, n_samples)
-    y = f(samples)
-    X = y + epsilon
+    X = np.linspace(-1.2, 2, n_samples)
+    y = f(X)
+    y_noise = y + epsilon
 
     # split to train and test
-    X_train, y_train, X_test, y_test = split_train_test(X, y, .66)
+    X_train, y_train, X_test, y_test = split_train_test(X, y, 2/3)
 
     # plot
     fig_1 = go.Figure()
-    fig_1.add_trace(go.Scatter(x=samples, y=y, mode="markers",
+    fig_1.add_trace(go.Scatter(x=X, y=y, mode="markers",
                                marker=dict(color="black"), name="True Model", showlegend=True))
-    fig_1.add_trace(go.Scatter(x=samples, y=X, mode="markers",
+    fig_1.add_trace(go.Scatter(x=X, y=y_noise, mode="markers",
                                marker=dict(color="red"), name="Noise Model", showlegend=True))
     fig_1.update_layout(title=f"Graph of Polynom f with {n_samples} samples <br> True Model and Noisy model with Noise"
                               f" = {noise}",
                         xaxis_title="samples sampled uniformly from [-1.2, 2]",
                         yaxis_title="f(x) for f = (x + 3) * (x + 2) * (x + 1) * (x - 1) * (x - 2)",
                         title_x=0.5)
-    fig_1.show()
+    # fig_1.show()
 
     # Question 2 - Perform CV for polynomial fitting with degrees 0,1,...,10
     pol_deg = [i for i in range(11)]
@@ -71,15 +71,15 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
                         xaxis_title="Polynomial Degree",
                         yaxis_title="Average Error",
                         title_x=0.5)
-    fig_2.show()
+    # fig_2.show()
 
     # Question 3 - Using best value of k, fit a k-degree polynomial model and report test error
     min_error = min(validation_errors)
     k_of_min_error = validation_errors.index(min_error)
     best_estimator = PolynomialFitting(k_of_min_error).fit(X_train, y_train)
     test_error = mean_square_error(y_test, best_estimator.predict(X_test))
-    print("K* = ", k_of_min_error)
-    print("test error for K* prediction = ", test_error)
+    print(f"K* = {k_of_min_error} for noise = {noise} and n_samples = {n_samples} ")
+    print(f"test error for K* = {k_of_min_error} prediction: {test_error}")
 
 
 def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 500):

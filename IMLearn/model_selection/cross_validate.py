@@ -53,30 +53,11 @@ def cross_validate(estimator: BaseEstimator, X: np.ndarray, y: np.ndarray,
         train_errors.append(scoring(y_train, y_pred_train))
         validation_errors.append(scoring(y_validate, y_pred_validation))
 
-    return (np.mean(train_errors),  np.mean(validation_errors))
+    return np.mean(train_errors),  np.mean(validation_errors)
 
 
 
 
 
 
-if __name__ == '__main__':
-    X = np.array([[74,99,66],[23,64,1],[56,45,5],[74,99,66],[23,64,1],[56,45,5]])
-    # print(X)
-    y = np.array([234,23,65,345,456,567])
-    # print(y)
-    # size_of_set = int(X.shape[0] / 3)
-    # splits = np.linspace(size_of_set, X.shape[0] -size_of_set ,size_of_set).astype(int)
-    # print(splits)
-    #
-    # X_S = np.split(X ,splits)
-    # y_S = np.split(y ,splits)
-    # for i in range(len(X_S)):
-    #     print(X_S[i], "->",y_S[i])
-    # cv = 3
-    # folder = np.remainder(np.arange(X.shape[0]), cv)
-    # for s in range(cv):
-    #     X_train, y_train = X[folder != s], y[folder != s]
-    #     X_validate, y_validate = X[folder == s], y[folder == s]
-    #     print("round = ", s)
-    #     print(X_train)
+
