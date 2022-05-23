@@ -52,7 +52,6 @@ def cross_validate(estimator: BaseEstimator, X: np.ndarray, y: np.ndarray,
         # assume we are calling the mean_square_error function
         train_errors.append(scoring(y_train, y_pred_train))
         validation_errors.append(scoring(y_validate, y_pred_validation))
-
     return np.mean(train_errors),  np.mean(validation_errors)
 
 
