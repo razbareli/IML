@@ -2,6 +2,8 @@ from __future__ import annotations
 from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
+from numpy.linalg import pinv
+from IMLearn.metrics.loss_functions import mean_square_error
 
 
 class RidgeRegression(BaseEstimator):
@@ -33,7 +35,6 @@ class RidgeRegression(BaseEstimator):
             `LinearRegression.fit` function.
         """
 
-
         """
         Initialize a ridge regression model
         :param lam: scalar value of regularization parameter
@@ -59,7 +60,23 @@ class RidgeRegression(BaseEstimator):
         -----
         Fits model with or without an intercept depending on value of `self.include_intercept_`
         """
-        raise NotImplementedError()
+        # in case we need to include intercept, insert a column of 1's
+        if self.include_intercept_:
+            X = np.insert(X, 0, np.ones(X.shape[0]), axis=1)
+        # make changes to input and make a linear regression fit
+        Id = np.identity(X.shape[1]) * np.sqrt(self.lam_)
+        if self.include_intercept_:
+            Id[0, 0] = 0
+        zeros = np.zeros(y.shape[1])
+        X_lam = np.concatenate(X, Id, axis=0)
+        y_lam = np.concatenate(y, zeros, axis=0)
+        # calculate the Moore-Penrose pseudo-inverse of X
+        mppi = pinv(X_lam)
+        # calculate the vector of coefficients
+        self.coefs_ = mppi @ y_lam
+
+
+
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -75,7 +92,9 @@ class RidgeRegression(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        if self.include_intercept_:
+            X = np.insert(X, 0, np.ones(X.shape[0]), axis=1)
+        return np.matmul(X, self.coefs_)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -94,4 +113,5 @@ class RidgeRegression(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        raise NotImplementedError()
+        predicted = self._predict(X)
+        return mean_square_error(y, predicted)

@@ -37,7 +37,6 @@ class LinearRegression(BaseEstimator):
         super().__init__()
         self.include_intercept_, self.coefs_ = include_intercept, None
 
-
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
         Fit Least Squares model to given samples
