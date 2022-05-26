@@ -67,9 +67,9 @@ class RidgeRegression(BaseEstimator):
         Id = np.identity(X.shape[1]) * np.sqrt(self.lam_)
         if self.include_intercept_:
             Id[0, 0] = 0
-        zeros = np.zeros(y.shape[1])
-        X_lam = np.concatenate(X, Id, axis=0)
-        y_lam = np.concatenate(y, zeros, axis=0)
+        zeros = np.zeros(X.shape[1])
+        X_lam = np.concatenate((X, Id), axis=0)
+        y_lam = np.concatenate((y, zeros), axis=0)
         # calculate the Moore-Penrose pseudo-inverse of X
         mppi = pinv(X_lam)
         # calculate the vector of coefficients

@@ -113,7 +113,7 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     train_errors_lasso = []
     val_errors_lasso = []
     for lam in ranges:
-        ridge = Ridge(alpha=lam)
+        ridge = RidgeRegression(lam)
         lasso = Lasso(alpha=lam)
         t_err_ridge, v_err_ridge = cross_validate(ridge, X_train, y_train, mean_square_error, 5)
         t_err_lasso, v_err_lasso = cross_validate(lasso, X_train, y_train, mean_square_error, 5)
