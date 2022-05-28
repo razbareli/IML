@@ -44,8 +44,10 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     fig_1 = go.Figure()
     fig_1.add_trace(go.Scatter(x=X, y=y_no_noise, mode="markers",
                                marker=dict(color="black"), name="True Model", showlegend=True))
-    fig_1.add_trace(go.Scatter(x=X, y=y, mode="markers",
-                               marker=dict(color="red"), name="Noise Model", showlegend=True))
+    fig_1.add_trace(go.Scatter(x=X_train, y=y_train, mode="markers",
+                               marker=dict(color="red"), name="Noise Model Train", showlegend=True))
+    fig_1.add_trace(go.Scatter(x=X_test, y=y_test, mode="markers",
+                               marker=dict(color="blue"), name="Noise Model Test", showlegend=True))
     fig_1.update_layout(title=f"Graph of Polynom f with {n_samples} samples <br> True Model and Noisy model with Noise"
                               f" = {noise}",
                         xaxis_title="samples sampled uniformly from [-1.2, 2]",
@@ -68,7 +70,8 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     fig_2.add_trace(go.Scatter(x=pol_deg, y=validation_errors, mode="markers+lines",
                                marker=dict(color="blue"), name="Average Validation Error", showlegend=True))
 
-    fig_2.update_layout(title="Average of Train & Validation Errors in 5-Fold Cross-Validation",
+    fig_2.update_layout(title=f"Average of Train & Validation Errors in 5-Fold Cross-Validation <br>"
+                              f"n_sample = {n_samples}, noise = {noise}",
                         xaxis_title="Polynomial Degree",
                         yaxis_title="Average Error",
                         title_x=0.5)
@@ -78,7 +81,7 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     min_error = min(validation_errors)
     k_of_min_error = validation_errors.index(min_error)
     best_estimator = PolynomialFitting(k_of_min_error).fit(X_train, y_train)
-    test_error = mean_square_error(y_test, best_estimator.predict(X_test))
+    test_error = round(mean_square_error(y_test, best_estimator.predict(X_test)), 2)
     print(f"noise: {noise}, n_samples: {n_samples}")
     print(f"K* = {k_of_min_error}")
     print(f"Test Error = {test_error}")
@@ -107,7 +110,7 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     y_test = y[train_size:]
 
     # Question 7 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
-    ranges = np.linspace(0.001, 2, num=n_evaluations)
+    ranges = np.linspace(0.01, 1.5, num=n_evaluations)
     train_errors_ridge = []
     val_errors_ridge = []
     train_errors_lasso = []
@@ -149,9 +152,9 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     best_lasso.fit(X_train, y_train)
     least_squares = LinearRegression().fit(X_train, y_train)
 
-    test_error_ridge = mean_square_error(y_test, best_ridge.predict(X_test))
-    test_error_lasso = mean_square_error(y_test, best_lasso.predict(X_test))
-    test_error_least_squares = mean_square_error(y_test, least_squares.predict(X_test))
+    test_error_ridge = round(mean_square_error(y_test, best_ridge.predict(X_test)), 2)
+    test_error_lasso = round(mean_square_error(y_test, best_lasso.predict(X_test)), 2)
+    test_error_least_squares = round(mean_square_error(y_test, least_squares.predict(X_test)), 2)
 
     print(f"Ridge: best lambda = {best_lam_ridge}, test error = {test_error_ridge}")
     print(f"Lasso: best lambda = {best_lam_lasso}, test error = {test_error_lasso}")
@@ -161,7 +164,7 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
 
 if __name__ == '__main__':
     np.random.seed(0)
-    # select_polynomial_degree()
-    # select_polynomial_degree(noise=0)
-    # select_polynomial_degree(1500, 10)
+    select_polynomial_degree()
+    select_polynomial_degree(noise=0)
+    select_polynomial_degree(1500, 10)
     select_regularization_parameter()
