@@ -34,7 +34,6 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .2
 
     """
 
-    # for a 0.75% samples in the train set - the train proportion should be 0.25
     split = np.random.rand(X.shape[0]) < train_proportion
     X_train = X[split]
     y_train = y[split]

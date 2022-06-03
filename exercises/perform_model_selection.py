@@ -7,7 +7,7 @@ from IMLearn.utils import split_train_test
 from IMLearn.model_selection import cross_validate
 from IMLearn.learners.regressors import PolynomialFitting, LinearRegression, RidgeRegression
 from sklearn.linear_model import Lasso
-from sklearn.linear_model import Ridge
+
 
 from utils import *
 import plotly.graph_objects as go
@@ -53,7 +53,7 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
                         xaxis_title="samples sampled uniformly from [-1.2, 2]",
                         yaxis_title="f(x) for f = (x + 3) * (x + 2) * (x + 1) * (x - 1) * (x - 2)",
                         title_x=0.5)
-    # fig_1.show()
+    fig_1.show()
 
     # Question 2 - Perform CV for polynomial fitting with degrees 0,1,...,10
     pol_deg = [i for i in range(11)]
@@ -75,7 +75,7 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
                         xaxis_title="Polynomial Degree",
                         yaxis_title="Average Error",
                         title_x=0.5)
-    # fig_2.show()
+    fig_2.show()
 
     # Question 3 - Using best value of k, fit a k-degree polynomial model and report test error
     min_error = min(validation_errors)
@@ -146,7 +146,7 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     best_lam_ridge = ranges[val_errors_ridge.index(min_error_ridge)]
     best_lam_lasso = ranges[val_errors_lasso.index(min_error_lasso)]
 
-    best_ridge = Ridge(best_lam_ridge)
+    best_ridge = RidgeRegression(best_lam_ridge)
     best_ridge.fit(X_train, y_train)
     best_lasso = Lasso(best_lam_lasso)
     best_lasso.fit(X_train, y_train)

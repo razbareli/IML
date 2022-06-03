@@ -40,7 +40,7 @@ def cross_validate(estimator: BaseEstimator, X: np.ndarray, y: np.ndarray,
     train_errors = []
     validation_errors = []
     # split X,y into #cv equal sets, fit each set and calculate the error
-    folder = np.remainder(np.arange(X.shape[0]), cv)
+    folder = np.mod(np.arange(X.shape[0]), cv)  # take every fifth sample to be in validation set
     for s in range(cv):
         # split to train and validate
         X_train, y_train = X[folder != s], y[folder != s]
