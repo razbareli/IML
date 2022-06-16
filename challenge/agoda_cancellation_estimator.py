@@ -24,8 +24,11 @@ class AgodaCancellationEstimator(BaseEstimator):
 
         """
         super().__init__()
-        self.random_classifier = RandomForestClassifier(min_samples_split=20,
-                                                        class_weight={True: 0.2, False: 1})
+        # self.random_classifier = RandomForestClassifier(min_samples_split=40,
+        #                                                 class_weight={True: 1, False: 10},
+        #                                                 )
+        #
+        self.random_classifier =  RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1)
         self.model = None
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:

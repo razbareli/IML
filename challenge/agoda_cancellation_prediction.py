@@ -1,8 +1,9 @@
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, roc_auc_score
 
 from challenge.agoda_cancellation_estimator import AgodaCancellationEstimator
 from IMLearn.utils import split_train_test
 from IMLearn.base import BaseEstimator
+from sklearn.metrics import classification_report
 import numpy as np
 import pandas as pd
 
@@ -22,9 +23,9 @@ def load_data(filename: str):
     2) Tuple of pandas.DataFrame and Series
     3) Tuple of ndarray of shape (n_samples, n_features) and ndarray of shape (n_samples,)
     """
-    # print(filename)
-    full_data = pd.read_csv(filename).fillna(
-        False)
+    print(filename)
+    full_data = pd.read_csv(filename).fillna(False)
+
     # pre-processing
     # convert data to numeric
     full_data.accommadation_type_name = full_data.accommadation_type_name.astype('category')
@@ -49,7 +50,8 @@ def load_data(filename: str):
         pd.to_numeric(full_data['days_before_checkin_pol'], errors='coerce'), fill_value=0)
     full_data['will_pay_for_cancellation'] = full_data.will_pay_for_cancellation.map(lambda x: x > 0)
     # choose what data we will train the model on
-    feature_cols = ["hotel_id", "days_before_checkin",
+    feature_cols = ["hotel_id",
+                    "days_before_checkin",
                     "accommadation_type_name_codes",
                     "charge_option_codes",
                     "customer_nationality_codes",
@@ -66,7 +68,7 @@ def load_data(filename: str):
         c1 = full_data['cancellation_datetime'].apply(lambda x: pd.Timestamp(x) if x is not False else x)
         c2 = full_data['booking_datetime'].apply(lambda x: pd.Timestamp(x))
         full_data['label2'] = [True if (c1[i] is not False and
-                           abs((c1[i] - c2[i]).days) <= 44) else False for i in range(len(c2))]
+                                        abs((c1[i] - c2[i]).days) <= 44) else False for i in range(len(c2))]
         labels2 = full_data['label2']
     else:
         labels2 = None
@@ -97,32 +99,50 @@ def evaluate_and_export(estimator: BaseEstimator, X: np.ndarray, filename: str):
     return estimate
 
 
+def f1_score(true: str, pred):
+    true = pd.read_csv(true).fillna(False)
+    labels = true['cancel']
+    # print(labels)
+    return classification_report(labels, pred, digits=4)
+
+
 if __name__ == '__main__':
     np.random.seed(0)
 
     # Load data
-    df, cancellation_labels = load_data("../datasets/agoda_cancellation_train.csv")
-    test_X, test_y, train_X, train_y,  = split_train_test(df, cancellation_labels)
+    df_train, cancellation_labels = load_data("../datasets/agoda_cancellation_train.csv")
+    test_X, test_y, train_X, train_y, = split_train_test(df_train, cancellation_labels)
     # (print(len(test_X), len(test_y), len(train_X), len(train_y), len(df)))
     # Fit model over data
     estimator = AgodaCancellationEstimator().fit(train_X, train_y)
     # check accuracy for 2 classes model
     # prediction = evaluate_and_export(estimator, test_X, "id1_id2_id3.csv")
     # accuracy = accuracy_score(test_y, prediction)
+    # auc_score = roc_auc_score(test_y, prediction)
     # true_positive = ((test_y == prediction) & (test_y)).sum() / len(test_y[test_y])
     # true_negative = ((test_y == prediction) & (~test_y)).sum() / len(test_y[~test_y])
     # print("accuracy = ", accuracy)
+    # print("roc score = ", auc_score)
     # print("true positive = ", true_positive)
     # print("true negative = ", true_negative)
+    # f1 score on train set
+    # f1 = classification_report(test_y, prediction, digits=2)
+
     # load the real database
-    df, cancellation_labels = load_data("../datasets/week_8_test_set.csv")
-
+    df_pred, cancellation_labels = load_data(f"../datasets/test_set_week_8.csv")
     # Store model predictions over test set
-    prediction = evaluate_and_export(estimator, df, "209019256_203488747_204859326.csv")
-    print(["False", "True"])
-    print(np.bincount(prediction))
+    prediction = evaluate_and_export(estimator, df_pred, "209019256_203488747_204859326.csv")
 
-
+    # check performance of previous weeks
+    for w in range(1, 9):
+        print(f"------------------------------ WEEK {w} --------------------------------- ")
+        df_pred, cancellation_labels = load_data(f"../datasets/test_set_week_{w}.csv")
+        # Store model predictions over test set
+        prediction = evaluate_and_export(estimator, df_pred, "209019256_203488747_204859326.csv")
+        # print(["False", "True"])
+        # print(np.bincount(prediction))
+        print(f1_score(f"../datasets/week_{w}_labels.csv", prediction))
+        print(f"----------------------------------------------------------------------- ")
 
     # print("actual orders cancelled: ", np.bincount(test_y)[1])
     # print("predicted cancelled orders: ",np.bincount(prediction & test_y)[1])
