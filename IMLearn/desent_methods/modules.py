@@ -131,7 +131,7 @@ class LogisticModule(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        raise NotImplementedError()
+        return np.sum(y * np.dot(X, self.weights) - np.log(1 + np.exp(np.dot(X, self.weights))))
 
     def compute_jacobian(self, X: np.ndarray, y: np.ndarray, **kwargs) -> np.ndarray:
         """
@@ -150,7 +150,11 @@ class LogisticModule(BaseModule):
         output: ndarray of shape (n_features,)
             Derivative of function with respect to self.weights at point self.weights
         """
-        raise NotImplementedError()
+        def der(i: int):
+            for j in range(X.shape[0]):
+                inner = np.dot(X[j], self.weights)
+                return (X[j][i] * self.weights[i] / inner) * (y[j] - (1 / (1 + np.exp(inner))))
+        return np.array([der(i) for i in range(X.shape[1])])
 
 
 class RegularizedModule(BaseModule):

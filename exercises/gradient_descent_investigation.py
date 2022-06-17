@@ -200,4 +200,19 @@ if __name__ == '__main__':
     np.random.seed(0)
     # compare_fixed_learning_rates()
     # compare_exponential_decay_rates()
-    fit_logistic_regression()
+    # fit_logistic_regression()
+
+    X = np.array([[1, 2, 3], [4, 5, 6]])
+    y = np.array(([11, 22]))
+    w = np.array([2, 2, 2])
+    print(np.sum(y * np.dot(X, w) - np.log(1 + np.exp(np.dot(X, w)))))
+    print(X.shape)
+
+
+    def der(i: int):
+        for j in range(X.shape[0]):
+            inner = np.dot(X[j], w)
+            return (X[j][i] * w[i] / inner) * (y[j] - (1 / (1 + np.exp(inner))))
+
+
+    print(np.array([der(i) for i in range(X.shape[1])]))
