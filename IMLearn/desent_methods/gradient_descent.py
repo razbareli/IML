@@ -130,13 +130,13 @@ class GradientDescent:
                        val=f.compute_output(),
                        grad=f.compute_jacobian(X=X, y=y),
                        t=iterations,
-                       eta=self.learning_rate_.lr_step(), delta=delta)
+                       eta=self.learning_rate_.lr_step(t=iterations), delta=delta)
         while iterations < self.max_iter_ and delta > self.tol_:
             # save previous iteration weights
             prev_weight = f.weights
             prev_output = f.compute_output()
             # update weights
-            f.weights = f.weights - self.learning_rate_.lr_step() * f.compute_jacobian(X=X, y=y)
+            f.weights = f.weights - self.learning_rate_.lr_step(t=iterations) * f.compute_jacobian(X=X, y=y)
             curr_output = f.compute_output()
             curr_jacob = f.compute_jacobian(X=X, y=y)
             if curr_output < prev_output:
@@ -149,7 +149,7 @@ class GradientDescent:
                            val=curr_output,
                            grad=curr_jacob,
                            t=iterations,
-                           eta=self.learning_rate_.lr_step(), delta=delta)
+                           eta=self.learning_rate_.lr_step(t=iterations), delta=delta)
         if self.out_type_ == "last":
             return f.weights
         if self.out_type_ == "best":
