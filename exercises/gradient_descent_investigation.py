@@ -189,30 +189,40 @@ def fit_logistic_regression():
     X_train, y_train, X_test, y_test = load_data()
 
     # Plotting convergence rate of logistic regression over SA heart disease data
-    raise NotImplementedError()
+    logistic = LogisticRegression(include_intercept=False)
+    logistic.fit(X_train.to_numpy(), y_train.to_numpy())
+    proba = logistic.predict_proba(X_train.to_numpy())
+
+
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
-    raise NotImplementedError()
+
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     # compare_fixed_learning_rates()
     # compare_exponential_decay_rates()
-    # fit_logistic_regression()
+    fit_logistic_regression()
 
-    X = np.array([[1, 2, 3], [4, 5, 6]])
-    y = np.array(([11, 22]))
-    w = np.array([2, 2, 2])
-    print(np.sum(y * np.dot(X, w) - np.log(1 + np.exp(np.dot(X, w)))))
-    print(X.shape)
+    # X = np.array([[1, 2, 3], [4, 5, 6]])
+    # y = np.array([11, 22])
+    # w = np.array([2, 2, 2])
+    # X = np.insert(X, 0, np.ones(X.shape[0]), axis=1)
+    # print(X)
+    # print(np.sum(y * np.dot(X, w) - np.log(1 + np.exp(np.dot(X, w)))))
+    # print(X.shape)
+    #
+    # pred = X @ w > 15
+    # print(pred)
+    #
+    #
+    # def der(i: int):
+    #     for j in range(X.shape[0]):
+    #         inner = np.dot(X[j], w)
+    #         return (X[j][i] * w[i] / inner) * (y[j] - (1 / (1 + np.exp(inner))))
 
 
-    def der(i: int):
-        for j in range(X.shape[0]):
-            inner = np.dot(X[j], w)
-            return (X[j][i] * w[i] / inner) * (y[j] - (1 / (1 + np.exp(inner))))
+    # print(np.array([der(i) for i in range(X.shape[1])]))
 
-
-    print(np.array([der(i) for i in range(X.shape[1])]))

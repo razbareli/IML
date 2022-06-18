@@ -8,8 +8,8 @@ from .learning_rate import FixedLR
 OUTPUT_VECTOR_TYPE = ["last", "best", "average"]
 
 
-def default_callback(**kwargs) -> NoReturn:
-    pass
+def default_callback(model,**kwargs) -> NoReturn:
+    return
 
 
 class GradientDescent:
@@ -127,17 +127,17 @@ class GradientDescent:
         delta = np.inf
         self.callback_(self,
                        weights=f.weights,
-                       val=f.compute_output(),
+                       val=f.compute_output(X=X, y=y),
                        grad=f.compute_jacobian(X=X, y=y),
                        t=iterations,
                        eta=self.learning_rate_.lr_step(t=iterations), delta=delta)
         while iterations < self.max_iter_ and delta > self.tol_:
             # save previous iteration weights
             prev_weight = f.weights
-            prev_output = f.compute_output()
+            prev_output = f.compute_output(X=X, y=y)
             # update weights
             f.weights = f.weights - self.learning_rate_.lr_step(t=iterations) * f.compute_jacobian(X=X, y=y)
-            curr_output = f.compute_output()
+            curr_output = f.compute_output(X=X, y=y)
             curr_jacob = f.compute_jacobian(X=X, y=y)
             if curr_output < prev_output:
                 best_weight = f.weights
