@@ -7,6 +7,7 @@ from IMLearn.desent_methods import GradientDescent, FixedLR, ExponentialLR
 from IMLearn.desent_methods.modules import L1, L2
 from IMLearn.learners.classifiers.logistic_regression import LogisticRegression
 from IMLearn.utils import split_train_test
+from IMLearn.metrics import misclassification_error
 
 import plotly.graph_objects as go
 
@@ -188,16 +189,34 @@ def fit_logistic_regression():
     # Load and split SA Heard Disease dataset
     X_train, y_train, X_test, y_test = load_data()
 
-    # Plotting convergence rate of logistic regression over SA heart disease data
-    logistic = LogisticRegression(solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=2000))
+    # fitting a logistic regression
+    logistic = LogisticRegression(solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000))
     logistic.fit(X_train.to_numpy(), y_train.to_numpy())
     proba = logistic.predict_proba(X_train.to_numpy())
-    pred = logistic.predict(X_train.to_numpy())
 
+    # roc curve of different alphas
+    from sklearn.metrics import roc_curve, auc
+    fpr, tpr, thresholds = roc_curve(y_train, proba,)
 
+    fig = go.Figure(
+        data=[go.Scatter(x=[0, 1], y=[0, 1], mode="lines", line=dict(color="black", dash='dash'),
+                         name="Random Class Assignment"),
+              go.Scatter(x=fpr, y=tpr, mode='markers+lines', text=thresholds, name="", showlegend=False, marker_size=5,
+                         marker_color="red",
+                         hovertemplate="<b>Threshold:</b>%{text:.3f}<br>FPR: %{x:.3f}<br>TPR: %{y:.3f}")],
+        layout=go.Layout(title=rf"$\text{{ROC Curve Of Fitted Model - AUC}}={auc(fpr, tpr):.6f}$",
+                         xaxis=dict(title=r"$\text{False Positive Rate (FPR)}$"),
+                         yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$")))
+    fig.show()
 
-    # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
-    # of regularization parameter
+    # best alpha
+    best_alpha = thresholds[np.argmax(tpr - fpr)]
+    print(f"best alpha = {best_alpha}")
+
+    # calculate test error
+    prediction_with_best_alpha = proba >= best_alpha
+    test_error = misclassification_error(y_train.to_numpy(), prediction_with_best_alpha)
+    print(f"Test error with best alpha = {test_error}")
 
 
 
@@ -211,6 +230,8 @@ if __name__ == '__main__':
     # y = np.array([11, 22])
     # w = np.array([2, 2, 2])
     # X = np.insert(X, 0, np.ones(X.shape[0]), axis=1)
+    # best = np.argmax(X)
+    # print(best)
     # print(X)
     # print(np.sum(y * np.dot(X, w) - np.log(1 + np.exp(np.dot(X, w)))))
     # print(X.shape)
