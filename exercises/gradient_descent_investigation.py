@@ -189,9 +189,10 @@ def fit_logistic_regression():
     X_train, y_train, X_test, y_test = load_data()
 
     # Plotting convergence rate of logistic regression over SA heart disease data
-    logistic = LogisticRegression(include_intercept=False)
+    logistic = LogisticRegression(solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=2000))
     logistic.fit(X_train.to_numpy(), y_train.to_numpy())
     proba = logistic.predict_proba(X_train.to_numpy())
+    pred = logistic.predict(X_train.to_numpy())
 
 
 

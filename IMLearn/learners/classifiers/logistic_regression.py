@@ -93,7 +93,7 @@ class LogisticRegression(BaseEstimator):
         if self.include_intercept_:
             X = np.insert(X, 0, np.ones(X.shape[0]), axis=1)
 
-        initial_weights = np.random.normal(0, 1, (X.shape[1]))
+        initial_weights = np.random.normal(0, 1, (X.shape[1])) / np.sqrt(X.shape[1])
         # our fidelity module
         logistic = LogisticModule(initial_weights)
         # our regularization term module
@@ -123,8 +123,8 @@ class LogisticRegression(BaseEstimator):
             Predicted responses of given samples
         """
         decide = lambda x: 1 if x > self.alpha_ else 0
-        pred = X @ self.coefs_
-        return np.array([decide(i) for i in pred])
+        prob = self.predict_proba(X)
+        return np.array([decide(i) for i in prob])
 
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -141,6 +141,8 @@ class LogisticRegression(BaseEstimator):
         probabilities: ndarray of shape (n_samples,)
             Probability of each sample being classified as `1` according to the fitted model
         """
+        if self.include_intercept_:
+            X = np.insert(X, 0, np.ones(X.shape[0]), axis=1)
         sigmoid = lambda x: np.exp(x) / (np.exp(x) + 1)
         pred = X @ self.coefs_
         return np.array([sigmoid(i) for i in pred])

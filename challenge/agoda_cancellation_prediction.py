@@ -129,20 +129,20 @@ if __name__ == '__main__':
     # f1 = classification_report(test_y, prediction, digits=2)
 
     # load the real database
-    df_pred, cancellation_labels = load_data(f"../datasets/test_set_week_8.csv")
+    df_pred, cancellation_labels = load_data(f"../datasets/test_set_week_10.csv")
     # Store model predictions over test set
     prediction = evaluate_and_export(estimator, df_pred, "209019256_203488747_204859326.csv")
 
     # check performance of previous weeks
-    for w in range(1, 9):
-        print(f"------------------------------ WEEK {w} --------------------------------- ")
-        df_pred, cancellation_labels = load_data(f"../datasets/test_set_week_{w}.csv")
-        # Store model predictions over test set
-        prediction = evaluate_and_export(estimator, df_pred, "209019256_203488747_204859326.csv")
-        # print(["False", "True"])
-        # print(np.bincount(prediction))
-        print(f1_score(f"../datasets/week_{w}_labels.csv", prediction))
-        print(f"----------------------------------------------------------------------- ")
+    # for w in range(1, 9):
+    #     print(f"------------------------------ WEEK {w} --------------------------------- ")
+    #     df_pred, cancellation_labels = load_data(f"../datasets/test_set_week_{w}.csv")
+    #     # Store model predictions over test set
+    #     prediction = evaluate_and_export(estimator, df_pred, "209019256_203488747_204859326.csv")
+    #     # print(["False", "True"])
+    #     # print(np.bincount(prediction))
+    #     print(f1_score(f"../datasets/week_{w}_labels.csv", prediction))
+    #     print(f"----------------------------------------------------------------------- ")
 
     # print("actual orders cancelled: ", np.bincount(test_y)[1])
     # print("predicted cancelled orders: ",np.bincount(prediction & test_y)[1])

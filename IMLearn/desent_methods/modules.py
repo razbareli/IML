@@ -8,6 +8,7 @@ class L2(BaseModule):
 
     Represents the function: f(w)=||w||^2_2
     """
+
     def __init__(self, weights: np.ndarray = None):
         """
         Initialize a module instance
@@ -103,6 +104,7 @@ class LogisticModule(BaseModule):
 
     Represents the function: f(w) = - (1/m) sum_i^m[y*<x_i,w> - log(1+exp(<x_i,w>))]
     """
+
     def __init__(self, weights: np.ndarray = None):
         """
         Initialize a logistic regression module instance
@@ -131,7 +133,7 @@ class LogisticModule(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        return (1 / X.shape[0]) * np.sum(y * np.dot(X, self.weights) - np.log(1 + np.exp(np.dot(X, self.weights))))
+        return - (1 / X.shape[0]) * np.sum(y * np.dot(X, self.weights) - np.log(1 + np.exp(np.dot(X, self.weights))))
 
     def compute_jacobian(self, X: np.ndarray, y: np.ndarray, **kwargs) -> np.ndarray:
         """
@@ -150,11 +152,29 @@ class LogisticModule(BaseModule):
         output: ndarray of shape (n_features,)
             Derivative of function with respect to self.weights at point self.weights
         """
-        def der(i: int):
-            for j in range(X.shape[0]):
-                inner = np.dot(X[j], self.weights)
-                return (X[j][i] * self.weights[i] / inner) * (y[j] - (1 / (1 + np.exp(inner))))
-        return np.array([der(i)/X.shape[0] for i in range(X.shape[1])])
+        sigmoid = lambda x: np.exp(x) / (np.exp(x) + 1)
+        der = np.zeros(X.shape[1])
+        for i in range(X.shape[0]):
+            inner = np.dot(X[i], self.weights)
+            sig = sigmoid(inner)
+            der += (y[i] - sig) * X[i]
+        return - der / X.shape[0]
+
+        # ans = np.zeros(X.shape[1])
+        # for j in range(X.shape[1]):
+        #     partial_der = 0
+        #     for i in range(X.shape[0]):
+        #         inner = np.dot(X[i], self.weights)
+        #         partial_der += (X[i][j] * self.weights[j] / inner) * (y[i] - (1 / (1 + np.exp(inner))))
+        #     ans[j] = partial_der / X.shape[0]
+        # # print(ans)
+        # return ans
+
+        # def der(i: int):
+        #     for j in range(X.shape[1]):
+        #         inner = np.dot(X[j], self.weights)
+        #         return - (X[j][i] * self.weights[i] / inner) * (y[j] - (1 / (1 + np.exp(inner))))
+        # return np.array([der(i) / X.shape[0] for i in range(X.shape[1])])
 
 
 class RegularizedModule(BaseModule):
@@ -164,6 +184,7 @@ class RegularizedModule(BaseModule):
     for F(w) being some fidelity function, R(w) some regularization function and lambda
     the regularization parameter
     """
+
     def __init__(self,
                  fidelity_module: BaseModule,
                  regularization_module: BaseModule,
@@ -211,7 +232,8 @@ class RegularizedModule(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        return self.fidelity_module_.compute_output(kwargs["X"], kwargs["y"]) + self.lam_ * self.regularization_module_.compute_output()
+        return self.fidelity_module_.compute_output(kwargs["X"], kwargs[
+            "y"]) + self.lam_ * self.regularization_module_.compute_output()
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
@@ -227,7 +249,8 @@ class RegularizedModule(BaseModule):
         output: ndarray of shape (n_in,)
             Derivative with respect to self.weights at point self.weights
         """
-        return self.fidelity_module_.compute_jacobian(kwargs["X"], kwargs["y"]) + self.lam_ * self.regularization_module_.compute_jacobian()
+        return self.fidelity_module_.compute_jacobian(kwargs["X"], kwargs[
+            "y"]) + self.lam_ * self.regularization_module_.compute_jacobian()
 
     @property
     def weights(self):
@@ -255,11 +278,6 @@ class RegularizedModule(BaseModule):
         """
         self.regularization_module_.weights = weights
         self.fidelity_module_.weights = weights
+        self.weights_ = weights
         if self.include_intercept_:
             self.fidelity_module_.weights[0] = 0
-
-
-
-
-
-
