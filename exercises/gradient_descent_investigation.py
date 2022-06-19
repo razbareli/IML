@@ -8,6 +8,7 @@ from IMLearn.desent_methods.modules import L1, L2
 from IMLearn.learners.classifiers.logistic_regression import LogisticRegression
 from IMLearn.utils import split_train_test
 from IMLearn.metrics import misclassification_error
+from IMLearn.model_selection import cross_validate
 
 import plotly.graph_objects as go
 
@@ -196,8 +197,19 @@ def fit_logistic_regression():
 
     # roc curve of different alphas
     from sklearn.metrics import roc_curve, auc
-    fpr, tpr, thresholds = roc_curve(y_train, proba,)
-
+    fpr, tpr, thresholds = roc_curve(y_train, proba)
+    # thresholds = np.linspace(0, 1, 101)
+    # fpr, tpr, diff = [], [], []
+    # for alpha in thresholds:
+    #     y_pred = np.where(proba >= alpha, 1, 0)
+    #     fp = np.sum((y_pred == 1) & (y_train == 0))
+    #     tp = np.sum((y_pred == 1) & (y_train == 1))
+    #     fn = np.sum((y_pred == 0) & (y_train == 1))
+    #     tn = np.sum((y_pred == 0) & (y_train == 0))
+    #     fpr.append((fp / (fp + tn)))
+    #     tpr.append(tp / (tp + fn))
+    #     diff.append((tp-fp)/(tp+fn))
+    # best_alpha = int(np.argmax(diff)) / 100
     fig = go.Figure(
         data=[go.Scatter(x=[0, 1], y=[0, 1], mode="lines", line=dict(color="black", dash='dash'),
                          name="Random Class Assignment"),
@@ -218,33 +230,50 @@ def fit_logistic_regression():
     test_error = misclassification_error(y_train.to_numpy(), prediction_with_best_alpha)
     print(f"Test error with best alpha = {test_error}")
 
+    # Q10 + Q11
+    # perform l1, l2 model selection
+
+    train_errors_l1 = []
+    val_errors_l1 = []
+    train_errors_l2 = []
+    val_errors_l2 = []
+    lambdas = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
+    for lam in lambdas:
+        l1_logistic = LogisticRegression(solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000),
+                                         penalty="l1", alpha=0.5, lam=lam)
+        l2_logistic = LogisticRegression(solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000),
+                                         penalty="l2", alpha=0.5, lam=lam)
+        t_err_l1, v_err_l1 = cross_validate(l1_logistic, X_train.to_numpy(),
+                                            y_train.to_numpy(), misclassification_error, 5)
+        t_err_l2, v_err_l2 = cross_validate(l2_logistic, X_train.to_numpy(),
+                                            y_train.to_numpy(), misclassification_error, 5)
+        train_errors_l1.append(t_err_l1)
+        val_errors_l1.append(v_err_l1)
+        train_errors_l2.append(t_err_l2)
+        val_errors_l2.append(v_err_l2)
+
+    min_error_l1 = min(val_errors_l1)
+    min_error_l2 = min(val_errors_l2)
+    best_lam_l1 = lambdas[val_errors_l1.index(min_error_l1)]
+    best_lam_l2 = lambdas[val_errors_l2.index(min_error_l2)]
+
+    best_l1 = LogisticRegression(solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000),
+                                 penalty="l1", alpha=0.5, lam=best_lam_l1)
+    best_l1.fit(X_train.to_numpy(), y_train.to_numpy())
+    best_l2 = LogisticRegression(solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000),
+                                 penalty="l2", alpha=0.5, lam=best_lam_l2)
+    best_l2.fit(X_train.to_numpy(), y_train.to_numpy())
+
+    test_error_l1 = round(misclassification_error(y_test.to_numpy(), best_l1.predict(X_test.to_numpy())), 2)
+    test_error_l2 = round(misclassification_error(y_test.to_numpy(), best_l2.predict(X_test.to_numpy())), 2)
+
+    print(f"l1: best lambda = {best_lam_l1}, test error = {test_error_l1}")
+    print(f"l2: best lambda = {best_lam_l2}, test error = {test_error_l2}")
 
 
 if __name__ == '__main__':
     np.random.seed(0)
-    # compare_fixed_learning_rates()
-    # compare_exponential_decay_rates()
+    compare_fixed_learning_rates()
+    compare_exponential_decay_rates()
     fit_logistic_regression()
-
-    # X = np.array([[1, 2, 3], [4, 5, 6]])
-    # y = np.array([11, 22])
-    # w = np.array([2, 2, 2])
-    # X = np.insert(X, 0, np.ones(X.shape[0]), axis=1)
-    # best = np.argmax(X)
-    # print(best)
-    # print(X)
-    # print(np.sum(y * np.dot(X, w) - np.log(1 + np.exp(np.dot(X, w)))))
-    # print(X.shape)
-    #
-    # pred = X @ w > 15
-    # print(pred)
-    #
-    #
-    # def der(i: int):
-    #     for j in range(X.shape[0]):
-    #         inner = np.dot(X[j], w)
-    #         return (X[j][i] * w[i] / inner) * (y[j] - (1 / (1 + np.exp(inner))))
-
-
-    # print(np.array([der(i) for i in range(X.shape[1])]))
 

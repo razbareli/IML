@@ -152,29 +152,18 @@ class LogisticModule(BaseModule):
         output: ndarray of shape (n_features,)
             Derivative of function with respect to self.weights at point self.weights
         """
-        sigmoid = lambda x: np.exp(x) / (np.exp(x) + 1)
-        der = np.zeros(X.shape[1])
-        for i in range(X.shape[0]):
-            inner = np.dot(X[i], self.weights)
-            sig = sigmoid(inner)
-            der += (y[i] - sig) * X[i]
-        return - der / X.shape[0]
 
-        # ans = np.zeros(X.shape[1])
-        # for j in range(X.shape[1]):
-        #     partial_der = 0
-        #     for i in range(X.shape[0]):
-        #         inner = np.dot(X[i], self.weights)
-        #         partial_der += (X[i][j] * self.weights[j] / inner) * (y[i] - (1 / (1 + np.exp(inner))))
-        #     ans[j] = partial_der / X.shape[0]
-        # # print(ans)
-        # return ans
+        m = X.shape[0]
+        X_dot_w = X @ self.weights
+        return (-1 / m) * ((y - (np.exp(X_dot_w) / (np.exp(X_dot_w) + 1))) @ X)
 
-        # def der(i: int):
-        #     for j in range(X.shape[1]):
-        #         inner = np.dot(X[j], self.weights)
-        #         return - (X[j][i] * self.weights[i] / inner) * (y[j] - (1 / (1 + np.exp(inner))))
-        # return np.array([der(i) / X.shape[0] for i in range(X.shape[1])])
+        # sigmoid = lambda x: np.exp(x) / (np.exp(x) + 1)
+        # der = np.zeros(X.shape[1])
+        # for i in range(X.shape[0]):
+        #     inner = np.dot(X[i], self.weights)
+        #     sig = sigmoid(inner)
+        #     der += (y[i] - sig) * X[i]
+        # return - der / X.shape[0]
 
 
 class RegularizedModule(BaseModule):
