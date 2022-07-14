@@ -121,8 +121,6 @@ class GradientDescent:
         """
         sum_of_weights = f.weights
         best_weight = f.weights
-        prev_weight = None
-        prev_output = None
         iterations = 0
         delta = np.inf
         self.callback_(self,

@@ -99,7 +99,7 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
             best_weights = GD.fit(norm, None, None)
             # plot path
             fig1 = plot_descent_path(module=func, descent_path=np.array(weights), title=f"for eta = {eta}")
-            fig1.show()
+            # fig1.show()
             # plot convergence rate
             iterations = [i for i in range(len(values))]
             fig2 = go.Figure()
@@ -110,7 +110,7 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
                 xaxis_title="iteration",
                 yaxis_title="norm value",
                 title_x=0.5)
-            fig2.show()
+            # fig2.show()
 
             # loss achived
             # norm.weights = best_weights
@@ -124,34 +124,40 @@ def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.
     # Plot algorithm's convergence for the different values of gamma
     fig_1 = go.Figure()
     colors = ["black", "blue", "green", "red"]
-    weights_gamma_95 = None  # to plot the path of gamma = 0.95
-
-    for g in range(len(gammas)):
-        initial_weights = np.copy(init)
-        l1 = L1(initial_weights)
-        callback, values, weights = get_gd_state_recorder_callback()
-        lr = ExponentialLR(eta, gammas[g])
-        GD = GradientDescent(learning_rate=lr, callback=callback)
-        best_weights = GD.fit(l1, None, None)
-        iterations = [i for i in range(len(values))]
-        if g == 1:  # to plot the path
-            weights_gamma_95 = weights
-        fig_1.add_trace(go.Scatter(x=iterations, y=values, mode="lines",
-                                   marker=dict(color=colors[g]), name="gammas = " + str(gammas[g]), showlegend=True))
-        # loss achived
-        # l1.weights = best_weights
-        # print(l1.compute_output())
+    weights_gamma_95_l1 = None  # to plot the path of gamma = 0.95
+    weights_gamma_95_l2 = None  # to plot the path of gamma = 0.95
+    for func in [L1, L2]:
+        for g in range(len(gammas)):
+            initial_weights = np.copy(init)
+            norm = func(initial_weights)
+            callback, values, weights = get_gd_state_recorder_callback()
+            lr = ExponentialLR(eta, gammas[g])
+            GD = GradientDescent(learning_rate=lr, callback=callback)
+            best_weights = GD.fit(norm, None, None)
+            iterations = [i for i in range(len(values))]
+            if g == 1 and func == L1:  # to plot the path
+                weights_gamma_95_l1 = weights
+            if g == 1 and func == L2:  # to plot the path
+                weights_gamma_95_l2 = weights
+            fig_1.add_trace(go.Scatter(x=iterations, y=values, mode="lines",
+                                       marker=dict(color=colors[g]), name="gammas = " + str(gammas[g]),
+                                       showlegend=True))
+            # loss achived
+            # norm.weights = best_weights
+            # print(norm.compute_output())
 
     fig_1.update_layout(
         title=f"Convergence Rate of norm L1 for eta = {eta}",
         xaxis_title="iteration",
         yaxis_title="norm value",
         title_x=0.5)
-    fig_1.show()
+    # fig_1.show()
 
     # Plot descent path for gamma=0.95
-    fig_2 = plot_descent_path(module=L1, descent_path=np.array(weights_gamma_95), title=f"for eta = {eta}")
-    fig_2.show()
+    fig_2 = plot_descent_path(module=L1, descent_path=np.array(weights_gamma_95_l1), title=f"for eta = {eta}")
+    # fig_2.show()
+    fig_3 = plot_descent_path(module=L2, descent_path=np.array(weights_gamma_95_l2), title=f"for eta = {eta}")
+    # fig_3.show()
 
 
 def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8) -> \

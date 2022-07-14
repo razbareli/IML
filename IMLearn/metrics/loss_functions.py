@@ -17,7 +17,7 @@ def mean_square_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     MSE of given predictions
     """
     diff = y_true - y_pred
-    squared = diff**2
+    squared = diff ** 2
     summa = np.sum(squared)
     return summa / len(diff)
 
@@ -40,13 +40,8 @@ def misclassification_error(y_true: np.ndarray, y_pred: np.ndarray, normalize: b
     Misclassification of given predictions
     """
 
-    loss = 0
-    for i in range(len(y_true)):
-        if y_true[i] != y_pred[i]:
-            loss += 1
-    if normalize:
-        return loss / len(y_pred)
-    return loss
+    score = np.sum(y_true != y_pred)
+    return score / len(y_true) if normalize else score
 
 
 def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -64,12 +59,7 @@ def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     -------
     Accuracy of given predictions
     """
-    accurate = 0
-    for i in range(len(y_true)):
-        if y_true[i] == y_pred[i]:
-            accurate += 1
-    return accurate / len(y_true)
-
+    return np.sum(y_true == y_pred) / len(y_true)
 
 
 def cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -87,5 +77,20 @@ def cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     -------
     Cross entropy of given predictions
     """
-    raise NotImplementedError()
+    return -np.sum(y_true * np.log(y_pred))
 
+
+def softmax(X: np.ndarray) -> np.ndarray:
+    """
+    Compute the Softmax function for each sample in given data
+
+    Parameters:
+    -----------
+    X: ndarray of shape (n_samples, n_features)
+
+    Returns:
+    --------
+    output: ndarray of shape (n_samples, n_features)
+        Softmax(x) for every sample x in given data X
+    """
+    return np.exp(X) / np.sum(np.exp(X), axis=0)

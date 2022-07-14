@@ -112,37 +112,23 @@ if __name__ == '__main__':
     # Load data
     df_train, cancellation_labels = load_data("../datasets/agoda_cancellation_train.csv")
     test_X, test_y, train_X, train_y, = split_train_test(df_train, cancellation_labels)
-    # (print(len(test_X), len(test_y), len(train_X), len(train_y), len(df)))
     # Fit model over data
     estimator = AgodaCancellationEstimator().fit(train_X, train_y)
-    # check accuracy for 2 classes model
-    # prediction = evaluate_and_export(estimator, test_X, "id1_id2_id3.csv")
-    # accuracy = accuracy_score(test_y, prediction)
-    # auc_score = roc_auc_score(test_y, prediction)
-    # true_positive = ((test_y == prediction) & (test_y)).sum() / len(test_y[test_y])
-    # true_negative = ((test_y == prediction) & (~test_y)).sum() / len(test_y[~test_y])
-    # print("accuracy = ", accuracy)
-    # print("roc score = ", auc_score)
-    # print("true positive = ", true_positive)
-    # print("true negative = ", true_negative)
-    # f1 score on train set
-    # f1 = classification_report(test_y, prediction, digits=2)
-
     # load the real database
     df_pred, cancellation_labels = load_data(f"../datasets/test_set_week_10.csv")
     # Store model predictions over test set
     prediction = evaluate_and_export(estimator, df_pred, "209019256_203488747_204859326.csv")
 
     # check performance of previous weeks
-    # for w in range(1, 9):
-    #     print(f"------------------------------ WEEK {w} --------------------------------- ")
-    #     df_pred, cancellation_labels = load_data(f"../datasets/test_set_week_{w}.csv")
-    #     # Store model predictions over test set
-    #     prediction = evaluate_and_export(estimator, df_pred, "209019256_203488747_204859326.csv")
-    #     # print(["False", "True"])
-    #     # print(np.bincount(prediction))
-    #     print(f1_score(f"../datasets/week_{w}_labels.csv", prediction))
-    #     print(f"----------------------------------------------------------------------- ")
+    for w in range(1, 11):
+        print(f"------------------------------ WEEK {w} --------------------------------- ")
+        df_pred, cancellation_labels = load_data(f"../datasets/test_set_week_{w}.csv")
+        # Store model predictions over test set
+        prediction = evaluate_and_export(estimator, df_pred, "209019256_203488747_204859326.csv")
+        # print(["False", "True"])
+        # print(np.bincount(prediction))
+        print(f1_score(f"../datasets/week_{w}_labels.csv", prediction))
+        print(f"----------------------------------------------------------------------- ")
 
     # print("actual orders cancelled: ", np.bincount(test_y)[1])
     # print("predicted cancelled orders: ",np.bincount(prediction & test_y)[1])

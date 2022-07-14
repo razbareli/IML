@@ -4,8 +4,6 @@ Class design and part of the code is taken and/or influenced
 by the Python scikit-learn package, and specifically the
 BaseEstimator.py file
 
-# Author: Gilad Green <iml@mail.huji.ac.il>
-# License: BSD 3 clause
 """
 from __future__ import annotations
 from abc import ABC, abstractmethod
