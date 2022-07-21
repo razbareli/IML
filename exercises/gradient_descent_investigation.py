@@ -99,7 +99,7 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
             best_weights = GD.fit(norm, None, None)
             # plot path
             fig1 = plot_descent_path(module=func, descent_path=np.array(weights), title=f"for eta = {eta}")
-            # fig1.show()
+            fig1.show()
             # plot convergence rate
             iterations = [i for i in range(len(values))]
             fig2 = go.Figure()
@@ -151,11 +151,11 @@ def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.
         xaxis_title="iteration",
         yaxis_title="norm value",
         title_x=0.5)
-    # fig_1.show()
+    fig_1.show()
 
     # Plot descent path for gamma=0.95
     fig_2 = plot_descent_path(module=L1, descent_path=np.array(weights_gamma_95_l1), title=f"for eta = {eta}")
-    # fig_2.show()
+    fig_2.show()
     fig_3 = plot_descent_path(module=L2, descent_path=np.array(weights_gamma_95_l2), title=f"for eta = {eta}")
     # fig_3.show()
 
@@ -280,6 +280,6 @@ def fit_logistic_regression():
 if __name__ == '__main__':
     np.random.seed(0)
     compare_fixed_learning_rates()
-    compare_exponential_decay_rates()
-    fit_logistic_regression()
+    # compare_exponential_decay_rates()
+    # fit_logistic_regression()
 

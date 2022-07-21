@@ -109,31 +109,27 @@ class StochasticGradientDescent:
                 Sample indices used in current SGD iteration
         """
         batch_indices = np.arange(X.shape[0])
-        sum_of_weights = f.weights
-        best_weight = f.weights
         iterations = 0
         delta = np.inf
         while iterations < self.max_iter_ and delta > self.tol_:
             # the batch in this iteration
-            batch_indices = np.random.choice(batch_indices, self.batch_size, replace=False)
+            batch_indices = np.random.choice(X.shape[0], self.batch_size, replace=False)
             # save previous iteration weights
             prev_weight = f.weights
-            prev_output = f.compute_output(X=X[batch_indices], y=y[batch_indices])
             # update weights
             curr_output, curr_jacob, eta = self._partial_fit(f, X[batch_indices], y[batch_indices], iterations)
-            f.weights = f.weights - eta * curr_jacob
-            if curr_output < prev_output:
-                best_weight = f.weights
+            # check improvement
             delta = np.sqrt(np.sum(np.power(f.weights - prev_weight, 2)))
-            sum_of_weights += f.weights
+
             iterations += 1
-            self.callback_(self,
+            self.callback_(
                            weights=f.weights,
                            val=curr_output,
                            grad=curr_jacob,
                            t=iterations,
-                           eta=eta, delta=delta)
-        return best_weight
+                           eta=eta,
+                           delta=delta)
+        return f.weights
 
 
     def _partial_fit(self, f: BaseModule, X: np.ndarray, y: np.ndarray, t: int) -> Tuple[np.ndarray, np.ndarray, float]:
@@ -166,6 +162,7 @@ class StochasticGradientDescent:
             learning rate used at current iteration
         """
         eta = self.learning_rate_.lr_step(t=t)
-        jacob = f.compute_jacobian(X=X, y=y)
         val = f.compute_output(X=X, y=y)
+        jacob = f.compute_jacobian(X=X, y=y)
+        f.weights -= eta * jacob
         return val, jacob, eta

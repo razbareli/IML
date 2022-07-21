@@ -32,8 +32,13 @@ class NeuralNetwork(BaseEstimator, BaseModule):
         self.modules = modules
         self.loss_fn = loss_fn
         self.solver = solver
-        self.pre_activations_ = []
-        self.post_activations_ = []
+        num_of_layers = len(self.modules)
+        self.pre_activations_ = np.empty(num_of_layers + 1, dtype=object)
+        self.pre_activations_[0] = 0
+        self.post_activations_ = np.empty(num_of_layers+ 1, dtype=object)
+
+        # added by me to get the probability vector for question 8
+        self.probs = None
 
     # region BaseEstimator implementations
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
@@ -48,7 +53,8 @@ class NeuralNetwork(BaseEstimator, BaseModule):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        self.solver.fit(self, X, y)
+
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -60,11 +66,14 @@ class NeuralNetwork(BaseEstimator, BaseModule):
             Input data to fit an estimator for
 
         Returns
-        -------
+        ------
         responses : ndarray of shape (n_samples, )
             Predicted labels of given samples
         """
-        raise NotImplementedError()
+
+        probs = self.compute_prediction(X)
+        self.probs = probs
+        return np.argmax(probs, axis=1)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -83,7 +92,7 @@ class NeuralNetwork(BaseEstimator, BaseModule):
         loss : float
             Performance under specified loss function
         """
-        return np.sum(self.loss_fn.compute_output(X=X, y=y)) / len(y)
+        return self.loss_fn.compute_output(X=self.compute_prediction(X), y=y)
 
     # endregion
 
@@ -109,8 +118,18 @@ class NeuralNetwork(BaseEstimator, BaseModule):
         -----
         Function stores all intermediate values in the `self.pre_activations_` and `self.post_activations_` arrays
         """
-        X = self.compute_prediction(X)
-        return self.loss_fn.compute_output(X=X, y=y)
+
+        self.post_activations_[0] = np.copy(X)
+        for i, module in enumerate(self.modules):
+            ot = self.post_activations_[i]
+            if module.include_intercept_:
+                at = np.insert(ot, 0, np.ones(ot.shape[0]), axis=1) @ module.weights
+            else:
+                at = ot @ module.weights
+            self.pre_activations_[i + 1] = at
+            self.post_activations_[i + 1] = module.compute_output(X=ot)
+        ans = self.loss_fn.compute_output(X=self.post_activations_[-1], y=y, **kwargs)
+        return np.mean(ans)
 
     def compute_prediction(self, X: np.ndarray):
         """
@@ -127,12 +146,10 @@ class NeuralNetwork(BaseEstimator, BaseModule):
         output : ndarray of shape (n_samples, n_classes)
             Network's output values prior to the call of the loss function
         """
-        curr = X
+        output = X.copy()
         for module in self.modules:
-            self.pre_activations_.append(curr @ module.weights)
-            curr = module.compute_output(curr)
-            self.post_activations_.append(curr)
-        return curr
+            output = module.compute_output(output)
+        return output
 
     def compute_jacobian(self, X: np.ndarray, y: np.ndarray, **kwargs) -> np.ndarray:
         """
@@ -155,14 +172,33 @@ class NeuralNetwork(BaseEstimator, BaseModule):
         Function depends on values calculated in forward pass and stored in
         `self.pre_activations_` and `self.post_activations_`
         """
-        final_jacob = [np.zeros(weight.shape) for weight in self.weights]
-        diff = self.modules[-1].compute_jacobian(X=self.post_activations_[-1], y=y) * \
-               self.modules[-1].compute_jacobian(X=self.pre_activations_[-1], y=y)
-        final_jacob[-1] = diff @ self.post_activations_[-2].T
-        for i in range(2, len(self.modules)):
-            diff = (self.weights[-i + 1].T @ diff) * self.modules[-i].compute_jacobian(self.pre_activations_[-i])
-            final_jacob[-i] = diff @ self.post_activations_[-i - 1].T
+
+        final_jacob = np.empty(len(self.modules), dtype=object)
+        at = self.pre_activations_[-1]
+        ot = self.post_activations_[-1]
+        initial_value = self.loss_fn.compute_jacobian(X=ot, y=y)
+        if self.modules[-1].activation_ is None:
+            delta = np.ones_like(at) * initial_value
+        else:
+            delta = self.modules[-1].activation_.compute_jacobian(X=at) * initial_value
+        for i, module in enumerate(reversed(self.modules), start=1):
+            at = self.pre_activations_[-i-1]
+            ot = self.post_activations_[-i-1]
+            if module.include_intercept_:
+                ot = np.insert(ot, 0, np.ones(ot.shape[0]), axis=1)
+            final_jacob[-i] = np.einsum('ij,ik->kj', delta, ot) / len(X)
+            if i < len(self.modules):
+                if self.modules[-i-1].activation_ is None:
+                    der = np.ones_like(at)
+                else:
+                    der = self.modules[-i-1].activation_.compute_jacobian(X=at)
+                if module.include_intercept_:
+                    delta = np.einsum('ji,ki->jk', delta, module.weights[1:]) * der
+                else:
+                    delta = np.einsum('ji,ki->jk', delta, module.weights) * der
+
         return self._flatten_parameters(final_jacob)
+
 
     @property
     def weights(self) -> np.ndarray:

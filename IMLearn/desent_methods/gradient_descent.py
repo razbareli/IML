@@ -8,8 +8,8 @@ from .learning_rate import FixedLR
 OUTPUT_VECTOR_TYPE = ["last", "best", "average"]
 
 
-def default_callback(model,**kwargs) -> NoReturn:
-    return
+def default_callback(**kwargs) -> NoReturn:
+    pass
 
 
 class GradientDescent:
@@ -118,39 +118,23 @@ class GradientDescent:
                 Learning rate used at current iteration
             - delta: float
                 Euclidean norm of w^(t)-w^(t-1)
+
         """
-        sum_of_weights = f.weights
-        best_weight = f.weights
-        iterations = 0
+        t = 0
         delta = np.inf
-        self.callback_(self,
-                       weights=f.weights,
-                       val=f.compute_output(X=X, y=y),
-                       grad=f.compute_jacobian(X=X, y=y),
-                       t=iterations,
-                       eta=self.learning_rate_.lr_step(t=iterations), delta=delta)
-        while iterations < self.max_iter_ and delta > self.tol_:
-            # save previous iteration weights
-            prev_weight = f.weights
-            prev_output = f.compute_output(X=X, y=y)
-            # update weights
-            f.weights = f.weights - self.learning_rate_.lr_step(t=iterations) * f.compute_jacobian(X=X, y=y)
-            curr_output = f.compute_output(X=X, y=y)
-            curr_jacob = f.compute_jacobian(X=X, y=y)
-            if curr_output < prev_output:
-                best_weight = f.weights
+        values, weights = [f.compute_output(X=X, y=y)], [f.weights]
+        while t < self.max_iter_ and delta > self.tol_:
+            eta = self.learning_rate_.lr_step(t=t)
+            grad = f.compute_jacobian(X=X, y=y)
+            prev_weight = f.weights  # old weights of objective (t-1)
+            f.weights = prev_weight - eta * grad  # new weights of objective (t)
             delta = np.sqrt(np.sum(np.power(f.weights - prev_weight, 2)))
-            sum_of_weights += f.weights
-            iterations += 1
-            self.callback_(self,
-                           weights=f.weights,
-                           val=curr_output,
-                           grad=curr_jacob,
-                           t=iterations,
-                           eta=self.learning_rate_.lr_step(t=iterations), delta=delta)
+            self.callback_(weights=f.weights, val=f.compute_output(X=X, y=y),
+                           grad=grad, t=t, eta=eta, delta=delta)
+            t += 1
         if self.out_type_ == "last":
-            return f.weights
-        if self.out_type_ == "best":
-            return best_weight
-        if self.out_type_ == "average":
-            return sum_of_weights / iterations
+            return weights[-1]
+        elif self.out_type_ == "best":
+            return weights[np.argmin(values)]
+        elif self.out_type_ == "average":
+            return np.mean(weights)
